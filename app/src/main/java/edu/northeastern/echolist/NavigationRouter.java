@@ -13,6 +13,8 @@ public class NavigationRouter {
     public NavigationRouter(BottomNavigationView bottomNavigationView, Activity currentActivity) {
         this.bottomNavigationView = bottomNavigationView;
         this.currentActivity = currentActivity;
+
+        this.bottomNavigationView.setItemHorizontalTranslationEnabled(false);
     }
 
     public void initNavigation() {

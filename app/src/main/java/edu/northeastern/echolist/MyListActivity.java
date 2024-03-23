@@ -14,6 +14,7 @@ public class MyListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_my_list);
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+        bottomNavigationView.setSelectedItemId(R.id.page_view_posts);
         NavigationRouter navigationRouter = new NavigationRouter(bottomNavigationView, this);
         navigationRouter.initNavigation();
     }
