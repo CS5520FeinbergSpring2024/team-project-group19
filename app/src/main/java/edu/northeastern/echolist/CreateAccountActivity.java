@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.view.Gravity;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -34,8 +36,19 @@ public class CreateAccountActivity extends AppCompatActivity {
         String password = passwordEditText.getText().toString().trim();
 
         if (userId.isEmpty() || password.isEmpty()) {
-            Toast.makeText(this, "Please enter user ID and password", Toast.LENGTH_SHORT).show();
+            Toast toast = Toast.makeText(this, "Please enter user ID and password", Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.CENTER, 0, 0);
+            toast.show();
+
+            userIdEditText.setBackgroundResource(R.color.errorHighlight);
+            passwordEditText.setBackgroundResource(R.color.errorHighlight);
+
+            new Handler().postDelayed(() -> {
+                userIdEditText.setBackgroundResource(android.R.color.transparent);
+                passwordEditText.setBackgroundResource(android.R.color.transparent);
+            }, 2000);
             return;
+
         }
 
         User newUser = new User(userId, password);
