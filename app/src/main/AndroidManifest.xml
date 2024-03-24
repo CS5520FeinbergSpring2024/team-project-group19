@@ -16,23 +16,23 @@
             android:name=".CreateAccountActivity"
             android:exported="false" />
         <activity
-            android:name=".SignInActivity"
-            android:exported="false" />
-        <activity
             android:name=".AddItemActivity"
             android:exported="false" />
         <activity
             android:name=".MyListActivity"
             android:exported="false" />
+        <activity android:name="HomeActivity"
+            android:exported="false" /> />
         <activity
-            android:name=".HomeActivity"
-            android:exported="true">
+            android:name=".SignInActivity"
+            android:exported="true" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+            <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent-filter>
         </activity>
+
     </application>
 
 </manifest>

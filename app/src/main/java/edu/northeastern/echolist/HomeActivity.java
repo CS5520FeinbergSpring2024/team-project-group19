@@ -18,4 +18,6 @@ public class HomeActivity extends AppCompatActivity {
         NavigationRouter navigationRouter = new NavigationRouter(bottomNavigationView, this);
         navigationRouter.initNavigation();
     }
+
+
 }
