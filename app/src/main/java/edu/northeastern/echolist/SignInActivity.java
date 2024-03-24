@@ -6,10 +6,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+import android.view.Gravity;
+
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -56,7 +59,18 @@ public class SignInActivity extends AppCompatActivity {
         String password = passwordEditText.getText().toString().trim();
 
         if (userId.isEmpty() || password.isEmpty()) {
-            Toast.makeText(this, "Please enter user ID and password", Toast.LENGTH_SHORT).show();
+            Toast toast = Toast.makeText(SignInActivity.this, "Please enter user ID and password", Toast.LENGTH_SHORT);
+            toast.setGravity(Gravity.CENTER, 0, 0);
+            toast.show();
+
+            // highlight color for empty input field.
+            userIdEditText.setBackgroundResource(R.color.errorHighlight);
+            passwordEditText.setBackgroundResource(R.color.errorHighlight);
+
+            new Handler().postDelayed(() -> {
+                userIdEditText.setBackgroundResource(android.R.color.transparent);
+                passwordEditText.setBackgroundResource(android.R.color.transparent);
+            }, 2000);
             return;
         }
 
@@ -67,7 +81,18 @@ public class SignInActivity extends AppCompatActivity {
                 if (user != null && user.getPassword().equals(password)) {
                     openHomeActivity(user);
                 } else {
-                    Toast.makeText(SignInActivity.this, "Incorrect user ID or password", Toast.LENGTH_SHORT).show();
+                    Toast toast = Toast.makeText(SignInActivity.this, "Incorrect user ID or password", Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+
+
+                    userIdEditText.setBackgroundResource(R.color.errorHighlight);
+                    passwordEditText.setBackgroundResource(R.color.errorHighlight);
+
+                    new Handler().postDelayed(() -> {
+                        userIdEditText.setBackgroundResource(android.R.color.transparent);
+                        passwordEditText.setBackgroundResource(android.R.color.transparent);
+                    }, 2000);
                 }
             }
 
