@@ -97,13 +97,17 @@ public class HomeActivity extends AppCompatActivity {
     // Logout confirmation Dialog from Home page.
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
         new AlertDialog.Builder(this)
                 .setMessage("Do you want to log out?")
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         FirebaseAuth.getInstance().signOut();
+                        SharedPreferences sharedPreferences = getSharedPreferences("namePref", MODE_PRIVATE);
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.clear();
+                        editor.apply();
+
                         Intent intent = new Intent(HomeActivity.this, SignInActivity.class);
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(intent);
