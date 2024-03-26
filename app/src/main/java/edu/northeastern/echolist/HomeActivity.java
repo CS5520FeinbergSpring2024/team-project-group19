@@ -11,23 +11,35 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 public class HomeActivity extends AppCompatActivity {
     private List<Event> eventsList = new ArrayList<>();
     protected TextView userIdTextView;
+    private Event deletedEvent;
 
 
     @Override
@@ -49,7 +61,8 @@ public class HomeActivity extends AppCompatActivity {
         userIdTextView.setText(userId);
 
         RecyclerView myEventRecyclerView = findViewById(R.id.my_events_recyclerview);
-        RecyclerView.LayoutManager lLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        RecyclerView.LayoutManager lLayoutManager = new LinearLayoutManager(this,
+                LinearLayoutManager.HORIZONTAL, false);
         myEventRecyclerView.setLayoutManager(lLayoutManager);
 
         EventAdapter eventAdapter = new EventAdapter(HomeActivity.this, eventsList);
@@ -57,7 +70,9 @@ public class HomeActivity extends AppCompatActivity {
 
         DatabaseReference databaseEvents = FirebaseDatabase.getInstance().getReference("events");
 
-        databaseEvents.addChildEventListener(new ChildEventListener() {
+        Query eventsByUser = databaseEvents.orderByChild("userId").equalTo(userId);
+
+        eventsByUser.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                 Event event = snapshot.getValue(Event.class);
@@ -87,6 +102,45 @@ public class HomeActivity extends AppCompatActivity {
 
             }
         });
+
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        Intent intent = getIntent();
+        if (intent != null && intent.getBooleanExtra("eventDeleted", false)) {
+            String eventId = intent.getStringExtra("deletedEventId");
+            String eventTitle = intent.getStringExtra("deletedEventTitle");
+            String eventLocation = intent.getStringExtra("deletedEventLocation");
+            String eventDate = intent.getStringExtra("deletedEventDate");
+            String userId = intent.getStringExtra("deletedEventUserId");
+
+            Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content),
+                    "Event deleted", Snackbar.LENGTH_LONG);
+            snackbar.setAction("Undo", new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Event restoredEvent = new Event(eventId, userId, eventTitle, eventLocation, eventDate);
+
+                    DatabaseReference databaseEvents = FirebaseDatabase.getInstance().getReference("events");
+                    databaseEvents.child(eventId).setValue(restoredEvent).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Toast.makeText(HomeActivity.this, "Event restored", Toast.LENGTH_SHORT).show();
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(HomeActivity.this, "Failed to restore event: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            });
+            snackbar.show();
+        }
     }
 
     @Override
