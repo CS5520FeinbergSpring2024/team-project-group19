@@ -20,7 +20,8 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_event_item_layout, parent, false);
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.activity_event_item_layout, parent, false);
         return new ViewHolder(view, this);
     }
 
@@ -29,11 +30,30 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
         Event event = eventsList.get(position);
         holder.titleTextView.setText(event.getTitle());
         holder.dateTextView.setText(event.getDate());
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(v.getContext(), AddItemActivity.class);
+                intent.putExtra("eventId", event.getEventId());
+                v.getContext().startActivity(intent);
+            }
+        });
     }
 
     @Override
     public int getItemCount() {
         return eventsList.size();
+    }
+
+    public void removeEventById(String eventId) {
+        for (int i = 0; i < eventsList.size(); i++) {
+            if (eventsList.get(i).getEventId().equals(eventId)) {
+                eventsList.remove(i);
+                notifyItemRemoved(i);
+                return;
+            }
+        }
     }
 
 
