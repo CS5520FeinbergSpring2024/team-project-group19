@@ -3,6 +3,7 @@ package edu.northeastern.echolist;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Gravity;
@@ -55,6 +56,11 @@ public class CreateAccountActivity extends AppCompatActivity {
 
         databaseReference.child(userId).setValue(newUser)
                 .addOnSuccessListener(aVoid -> {
+                    SharedPreferences sharedPreferences = getSharedPreferences("namePref", MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString("username", userId);
+                    editor.apply();
+
                     Intent intent = new Intent(CreateAccountActivity.this, HomeActivity.class);
                     startActivity(intent);
                     finish();
