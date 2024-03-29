@@ -20,7 +20,8 @@
             app:srcCompat="@drawable/ic_launcher_background"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            android:contentDescription="@string/image_description_placeholder_string" />
 
         <TextView
             android:id="@+id/gift_title"
