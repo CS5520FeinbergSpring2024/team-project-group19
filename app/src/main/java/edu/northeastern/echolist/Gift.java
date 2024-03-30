@@ -4,12 +4,12 @@ public class Gift {
     private String giftId;
     private String name;
     private String description;
-    private boolean isTrending;
+    private int isTrending;
     private String image;
 
     public Gift() {}
 
-    public Gift(String giftId, String name, String description, boolean isTrending, String image) {
+    public Gift(String giftId, String name, String description, int isTrending, String image) {
         this.giftId = giftId;
         this.name = name;
         this.description = description;
@@ -37,12 +37,16 @@ public class Gift {
         this.description = description;
     }
 
-    public boolean getIsTrending() {
+    public int getIsTrending() {
         return this.isTrending;
     }
 
     public String getImage() {
         return this.image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
     }
 
 }
