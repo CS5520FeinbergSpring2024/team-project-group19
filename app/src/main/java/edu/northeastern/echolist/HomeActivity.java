@@ -26,24 +26,23 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 
 public class HomeActivity extends AppCompatActivity {
     private List<Event> eventsList = new ArrayList<>();
+    private GiftAdapter giftAdapter;
+    private List<Gift> trendingGifts = new ArrayList<>();
     protected TextView userIdTextView;
     private Event deletedEvent;
-
-    private List<Event> upcomingEventsList = new ArrayList<>();
 
 
     @Override
@@ -107,6 +106,22 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
+        RecyclerView trendingGiftsRecyclerView = findViewById(R.id.trending_gift_recyclerview);
+        RecyclerView.LayoutManager giftLayoutManager = new LinearLayoutManager(this,
+                LinearLayoutManager.HORIZONTAL, false);
+        trendingGiftsRecyclerView.setLayoutManager(giftLayoutManager);
+        giftAdapter = new GiftAdapter(new ArrayList<>(), new GiftAdapter.OnGiftClickListener() {
+            @Override
+            public void onGiftClick(Gift gift) {
+                // handle gift click event
+                GiftDialog dialog = GiftDialog.newInstance(gift.getDescription());
+                dialog.show(getSupportFragmentManager(), "GiftDialog");
+            }
+        });
+        trendingGiftsRecyclerView.setAdapter(giftAdapter);
+
+        // fetch trending gifts from Firebase
+        fetchTrendingGifts();
     }
 
     @Override
@@ -173,4 +188,36 @@ public class HomeActivity extends AppCompatActivity {
                 .setNegativeButton("No", null)
                 .show();
     }
+
+    private void fetchTrendingGifts() {
+        DatabaseReference giftsRef = FirebaseDatabase.getInstance().getReference("gifts");
+        giftsRef.orderByChild("isTrending").equalTo(1)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        trendingGifts.clear();
+                        for (DataSnapshot giftSnapshot : dataSnapshot.getChildren()) {
+                            Gift gift = giftSnapshot.getValue(Gift.class);
+                            if (gift != null) {
+                                trendingGifts.add(gift);
+                            }
+                        }
+                        // randomly select gifts from the trendingGifts list
+                        List<Gift> selectedGifts = getRandomGifts(trendingGifts, 3); // select 3 random gifts
+                        // update the UI with the selected gifts
+                        giftAdapter.setGifts(selectedGifts);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        // todo: error handling
+                    }
+                });
+    }
+    private List<Gift> getRandomGifts(List<Gift> gifts, int count) {
+        List<Gift> randomGifts = new ArrayList<>(gifts);
+        Collections.shuffle(randomGifts);
+        return randomGifts.subList(0, Math.min(count, randomGifts.size()));
+    }
+
 }

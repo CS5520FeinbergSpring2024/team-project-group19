@@ -3,4 +3,10 @@
     <string name="home">Home</string>
     <string name="add">Add</string>
     <string name="my_list">My List</string>
+    <string name="trending_gifts_string">Trending Gifts</string>
+    <string name="my_events_string">My Events</string>
+    <string name="upcoming_events_string">Upcoming Events</string>
+    <string name="user_icon_string">user icon</string>
+    <string name="gift_name_placeholder_string">Gift Name</string>
+    <string name="image_description_placeholder_string">Image description</string>
 </resources>
