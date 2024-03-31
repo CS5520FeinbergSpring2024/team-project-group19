@@ -43,6 +43,7 @@ public class AddItemActivity extends AppCompatActivity {
     private Spinner visibilitySpinner;
     private Button deleteEventButton;
     private Button updateEventButton;
+    private Button addwishListButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,13 +73,14 @@ public class AddItemActivity extends AppCompatActivity {
         visibilitySpinner = findViewById(R.id.visibilitySpinner);
         deleteEventButton = findViewById(R.id.deleteEventButton);
         updateEventButton = findViewById(R.id.updateEventButton);
+        addwishListButton = findViewById(R.id.addWishlistButton);
 
         eventDate.setOnClickListener(new View.OnClickListener() {
-                                         @Override
-                                         public void onClick(View v) {
-                                             showDateDialog();
-                                         }
-                                     });
+            @Override
+                    public void onClick(View v) {
+                        showDateDialog();
+                    }
+        });
 
         saveEventButton.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -142,9 +144,12 @@ public class AddItemActivity extends AppCompatActivity {
                                     public void onDataChange(@NonNull DataSnapshot snapshot) {
                                         Event event = snapshot.getValue(Event.class);
                                         if (event != null) {
-                                            Event deletedEvent = new Event(event.getEventId(), event.getUserId(), event.getTitle(), event.getLocation(), event.getDate());
+                                            Event deletedEvent = new Event(event.getEventId(),
+                                                    event.getUserId(), event.getTitle(),
+                                                    event.getLocation(), event.getDate());
 
-                                            snapshot.getRef().removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            snapshot.getRef().removeValue()
+                                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
                                                 @Override
                                                 public void onSuccess(Void unused) {
                                                     Intent intent = new Intent(AddItemActivity.this, HomeActivity.class);
