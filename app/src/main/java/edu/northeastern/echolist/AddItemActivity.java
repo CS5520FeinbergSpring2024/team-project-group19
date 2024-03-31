@@ -43,6 +43,7 @@ public class AddItemActivity extends AppCompatActivity {
     private Spinner visibilitySpinner;
     private Button deleteEventButton;
     private Button updateEventButton;
+    private BottomNavigationView bottomNavigationView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +73,7 @@ public class AddItemActivity extends AppCompatActivity {
         visibilitySpinner = findViewById(R.id.visibilitySpinner);
         deleteEventButton = findViewById(R.id.deleteEventButton);
         updateEventButton = findViewById(R.id.updateEventButton);
+        bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         eventDate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -181,6 +183,26 @@ public class AddItemActivity extends AppCompatActivity {
                         .show();
             }
         });
+
+        bottomNavigationView.setSelectedItemId(R.id.page_add_post);
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            if (item.getItemId() == R.id.page_home) {
+                new AlertDialog.Builder(this)
+                        .setMessage("Are you sure you want to exit? The data will not be saved once you exit.")
+                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Intent intent = new Intent(AddItemActivity.this, HomeActivity.class);
+                                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                                startActivity(intent);
+                            }
+                        })
+                        .setNegativeButton("No", null)
+                        .show();
+                return true;
+            }
+            return false;
+        });
     }
 
     private void showDateDialog() {
@@ -248,10 +270,6 @@ public class AddItemActivity extends AppCompatActivity {
             }
         });
     }
-
-
-
-
 
     @Override
     public void onBackPressed() {
