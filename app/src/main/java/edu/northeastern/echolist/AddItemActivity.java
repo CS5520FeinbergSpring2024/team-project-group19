@@ -43,7 +43,6 @@ public class AddItemActivity extends AppCompatActivity {
     private Spinner visibilitySpinner;
     private Button deleteEventButton;
     private Button updateEventButton;
-    private Button addwishListButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,7 +72,6 @@ public class AddItemActivity extends AppCompatActivity {
         visibilitySpinner = findViewById(R.id.visibilitySpinner);
         deleteEventButton = findViewById(R.id.deleteEventButton);
         updateEventButton = findViewById(R.id.updateEventButton);
-        addwishListButton = findViewById(R.id.addWishlistButton);
 
         eventDate.setOnClickListener(new View.OnClickListener() {
             @Override

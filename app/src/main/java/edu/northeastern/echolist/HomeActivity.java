@@ -76,14 +76,6 @@ public class HomeActivity extends AppCompatActivity {
 
         Query eventsByUser = databaseEvents.orderByChild("userId").equalTo(userId);
 
-        RecyclerView upcomingEventsRecyclerView = findViewById(R.id.upcoming_events_recyclerview);
-        RecyclerView.LayoutManager lLayoutManagerUpcomingEvents = new LinearLayoutManager(this,
-                LinearLayoutManager.HORIZONTAL, false);
-        upcomingEventsRecyclerView.setLayoutManager(lLayoutManagerUpcomingEvents);
-
-        EventAdapter upcomingEventAdapter = new EventAdapter(HomeActivity.this, upcomingEventsList);
-        upcomingEventsRecyclerView.setAdapter(upcomingEventAdapter);
-
         eventsByUser.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
@@ -91,22 +83,6 @@ public class HomeActivity extends AppCompatActivity {
                 if (event != null) {
                     eventsList.add(event); // Add the event to your list
                     eventAdapter.notifyItemInserted(eventsList.size() - 1);
-
-                    try {
-                        Calendar calendar = Calendar.getInstance();
-                        Date currentDate = calendar.getTime();
-                        calendar.add(Calendar.MONTH, 1);
-                        Date oneMonthAhead = calendar.getTime();
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-                        Date eventDate = sdf.parse(event.getDate());
-
-                        if (eventDate != null && !eventDate.before(currentDate) && !eventDate.after(oneMonthAhead)) {
-                            upcomingEventsList.add(event);
-                            upcomingEventAdapter.notifyItemInserted(upcomingEventsList.size() - 1);
-                        }
-                    } catch (ParseException e) {
-                        throw new RuntimeException(e);
-                    }
                 }
             }
 
