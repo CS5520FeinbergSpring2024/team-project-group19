@@ -90,6 +90,15 @@ public class AddItemActivity extends AppCompatActivity {
                         String location = eventLocation.getText().toString();
                         String date = eventDate.getText().toString();
 
+                        if (title.isEmpty() || date.isEmpty()) {
+                            new AlertDialog.Builder(AddItemActivity.this)
+                                    .setTitle("Missing Information")
+                                    .setMessage("Both Title and Date fields are required.")
+                                    .setPositiveButton("OK", null)
+                                    .show();
+                            return;
+                        }
+
                         String eventId = databaseEvents.push().getKey();
                         Event event = new Event(eventId, userId, title, location, date);
 
@@ -186,7 +195,7 @@ public class AddItemActivity extends AppCompatActivity {
 
         bottomNavigationView.setSelectedItemId(R.id.page_add_post);
         bottomNavigationView.setOnItemSelectedListener(item -> {
-            if (item.getItemId() == R.id.page_home) {
+            if (item.getItemId() == R.id.page_home || item.getItemId() == R.id.page_view_posts) {
                 new AlertDialog.Builder(this)
                         .setMessage("Are you sure you want to exit? The data will not be saved once you exit.")
                         .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
@@ -238,6 +247,16 @@ public class AddItemActivity extends AppCompatActivity {
                             String updatedTitle = eventTitle.getText().toString();
                             String updatedLocation = eventLocation.getText().toString();
                             String updatedDate = eventDate.getText().toString();
+
+                            if (updatedTitle.isEmpty() || updatedDate.isEmpty()) {
+                                new AlertDialog.Builder(AddItemActivity.this)
+                                        .setTitle("Missing Information")
+                                        .setMessage("Both Title and Date fields are required.")
+                                        .setPositiveButton("OK", null)
+                                        .show();
+                                return;
+                            }
+
 
                             DatabaseReference eventRef = FirebaseDatabase.getInstance().getReference("events").child(eventId);
 
