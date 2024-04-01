@@ -42,6 +42,7 @@ public class HomeActivity extends AppCompatActivity {
     private List<Event> eventsList = new ArrayList<>();
     private List<Event> sortedEventsList = new ArrayList<>(); // Keeps all events sorted
     private List<Event> upcomingEventsList = new ArrayList<>(); //Only events to be shown
+    private EventAdapter upcomingEventAdapter;
     private GiftAdapter giftAdapter;
     private List<Gift> trendingGifts = new ArrayList<>();
     protected TextView userIdTextView;
@@ -114,7 +115,7 @@ public class HomeActivity extends AppCompatActivity {
         RecyclerView.LayoutManager upcomingLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         upcomingEventRecyclerView.setLayoutManager(upcomingLayoutManager);
 
-        EventAdapter upcomingEventAdapter = new EventAdapter(HomeActivity.this, upcomingEventsList);
+        upcomingEventAdapter = new EventAdapter(HomeActivity.this, upcomingEventsList);
         upcomingEventRecyclerView.setAdapter(upcomingEventAdapter);
 
         Query upcomingEventsByUser = databaseEvents.orderByChild("userId")
@@ -123,38 +124,7 @@ public class HomeActivity extends AppCompatActivity {
         upcomingEventsByUser.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                Event event = snapshot.getValue(Event.class);
-
-                if (event != null) {
-                    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-                    Date eventDate = null;
-                    try {
-                        eventDate = dateFormat.parse(event.getDate());
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
-
-                    // Included to make today inclusive.
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.set(Calendar.HOUR_OF_DAY, 0);
-                    calendar.set(Calendar.MINUTE, 0);
-                    calendar.set(Calendar.SECOND, 0);
-                    calendar.set(Calendar.MILLISECOND, 0);
-                    Date today = calendar.getTime();
-
-                    if (eventDate != null && !eventDate.before(today)) {
-                        sortedEventsList.add(event);
-                        Collections.sort(sortedEventsList, eventDateComparator);
-
-                        if (sortedEventsList.size() > 2) {
-                            sortedEventsList.subList(2, sortedEventsList.size()).clear();
-                        }
-
-                        upcomingEventsList.clear();
-                        upcomingEventsList.addAll(sortedEventsList);
-                        upcomingEventAdapter.notifyDataSetChanged();
-                    }
-                }
+                handleUpcomingEventChildAdded(snapshot);
             }
 
             @Override
@@ -173,9 +143,6 @@ public class HomeActivity extends AppCompatActivity {
             public void onCancelled(@NonNull DatabaseError error) {
             }
         });
-
-
-
 
 
         RecyclerView trendingGiftsRecyclerView = findViewById(R.id.trending_gift_recyclerview);
@@ -290,6 +257,41 @@ public class HomeActivity extends AppCompatActivity {
         List<Gift> randomGifts = new ArrayList<>(gifts);
         Collections.shuffle(randomGifts);
         return randomGifts.subList(0, Math.min(count, randomGifts.size()));
+    }
+
+    private void handleUpcomingEventChildAdded(DataSnapshot snapshot) {
+        Event event = snapshot.getValue(Event.class);
+
+        if (event != null) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            Date eventDate = null;
+            try {
+                eventDate = dateFormat.parse(event.getDate());
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+            // Included to make today inclusive.
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            Date today = calendar.getTime();
+
+            if (eventDate != null && !eventDate.before(today)) {
+                sortedEventsList.add(event);
+                Collections.sort(sortedEventsList, eventDateComparator);
+
+                if (sortedEventsList.size() > 2) {
+                    sortedEventsList.subList(2, sortedEventsList.size()).clear();
+                }
+
+                upcomingEventsList.clear();
+                upcomingEventsList.addAll(sortedEventsList);
+                upcomingEventAdapter.notifyDataSetChanged();
+            }
+        }
     }
 
     // Comparator for sorted events.
