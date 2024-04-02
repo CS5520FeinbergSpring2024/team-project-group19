@@ -1,5 +1,7 @@
 package edu.northeastern.echolist;
 
+import static android.content.ContentValues.TAG;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -9,8 +11,14 @@ import android.app.DatePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -18,8 +26,20 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.widget.Autocomplete;
+import com.google.android.libraries.places.widget.AutocompleteActivity;
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
@@ -30,7 +50,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.List;
 
 public class AddItemActivity extends AppCompatActivity {
     protected TextView userIdTextView;
@@ -44,6 +69,9 @@ public class AddItemActivity extends AppCompatActivity {
     private Button deleteEventButton;
     private Button updateEventButton;
     private BottomNavigationView bottomNavigationView;
+//    private AutoCompleteTextView eventLocation;
+//    private RequestQueue requestQueue;
+    private static final int AUTOCOMPLETE_REQUEST_CODE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,11 +103,21 @@ public class AddItemActivity extends AppCompatActivity {
         updateEventButton = findViewById(R.id.updateEventButton);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
+//        requestQueue = Volley.newRequestQueue(this);
+//        setupLocationAutocomplete();
+
         eventDate.setOnClickListener(new View.OnClickListener() {
             @Override
                     public void onClick(View v) {
                         showDateDialog();
                     }
+        });
+
+        eventLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openAutocompleteActivity();
+            }
         });
 
         saveEventButton.setOnClickListener(new View.OnClickListener() {
@@ -212,6 +250,10 @@ public class AddItemActivity extends AppCompatActivity {
             }
             return false;
         });
+
+        if (!Places.isInitialized()) {
+            Places.initialize(getApplicationContext(), "AIzaSyDAa1Wd5O8dpjeh1RdozE2_x221_tWiX00");
+        }
     }
 
     private void showDateDialog() {
@@ -305,4 +347,75 @@ public class AddItemActivity extends AppCompatActivity {
                 .setNegativeButton("No", null)
                 .show();
     }
+
+//    private void setupLocationAutocomplete() {
+//        eventLocation.addTextChangedListener(new TextWatcher() {
+//            @Override
+//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+//
+//            @Override
+//            public void onTextChanged(CharSequence s, int start, int before, int count) {
+//                if (!s.toString().equals("")) {
+//                    getSuggestions(s.toString());
+//                }
+//            }
+//
+//            @Override
+//            public void afterTextChanged(Editable s) {}
+//        });
+//    }
+//
+//    private void getSuggestions(String query) {
+//        String url = "https://nominatim.openstreetmap.org/search?format=json&q=" + Uri.encode(query);
+//
+//        StringRequest request = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
+//            @Override
+//            public void onResponse(String response) {
+//                try {
+//                    JSONArray jsonArray = new JSONArray(response);
+//                    String[] suggestions = new String[jsonArray.length()];
+//
+//                    for (int i = 0; i < jsonArray.length(); i++) {
+//                        JSONObject jsonObject = jsonArray.getJSONObject(i);
+//                        String address = jsonObject.getString("display_name");
+//                        suggestions[i] = address;
+//                    }
+//
+//                    ArrayAdapter<String> adapter = new ArrayAdapter<>(AddItemActivity.this, android.R.layout.simple_dropdown_item_1line, suggestions);
+//                    eventLocation.setAdapter(adapter);
+//                    adapter.notifyDataSetChanged();
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }, new Response.ErrorListener() {
+//            @Override
+//            public void onErrorResponse(VolleyError error) {
+//                error.printStackTrace();
+//            }
+//        });
+//
+//        requestQueue.add(request);
+//    }
+
+    private void openAutocompleteActivity() {
+        List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS);
+        Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fields)
+                .build(this);
+        startActivityForResult(intent, 1);
+    }
+
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 1) {
+            if (resultCode == RESULT_OK) {
+                Place place = Autocomplete.getPlaceFromIntent(data);
+                eventLocation.setText(place.getAddress());
+            } else if (resultCode == RESULT_CANCELED) {
+                Log.i(TAG, "User canceled autocomplete");
+            }
+        }
+    }
+
 }
