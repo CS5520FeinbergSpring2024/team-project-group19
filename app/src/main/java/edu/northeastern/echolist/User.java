@@ -3,6 +3,8 @@ package edu.northeastern.echolist;
 public class User {
     private String userId;
     private String password;
+    private String profileImageUrl;
+
 
 
     public User() {
@@ -26,5 +28,13 @@ public class User {
     public String getPassword() {
         return password;
     }
+
+    public String getProfileImageUrl() {
+        return profileImageUrl;
+    }
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
+    }
+
 
 }
