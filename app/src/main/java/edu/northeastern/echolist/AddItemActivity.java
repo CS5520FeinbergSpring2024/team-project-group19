@@ -69,8 +69,6 @@ public class AddItemActivity extends AppCompatActivity {
     private Button deleteEventButton;
     private Button updateEventButton;
     private BottomNavigationView bottomNavigationView;
-//    private AutoCompleteTextView eventLocation;
-//    private RequestQueue requestQueue;
     private static final int AUTOCOMPLETE_REQUEST_CODE = 1;
 
     @Override
@@ -103,8 +101,6 @@ public class AddItemActivity extends AppCompatActivity {
         updateEventButton = findViewById(R.id.updateEventButton);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
-//        requestQueue = Volley.newRequestQueue(this);
-//        setupLocationAutocomplete();
 
         eventDate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -348,55 +344,6 @@ public class AddItemActivity extends AppCompatActivity {
                 .show();
     }
 
-//    private void setupLocationAutocomplete() {
-//        eventLocation.addTextChangedListener(new TextWatcher() {
-//            @Override
-//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-//
-//            @Override
-//            public void onTextChanged(CharSequence s, int start, int before, int count) {
-//                if (!s.toString().equals("")) {
-//                    getSuggestions(s.toString());
-//                }
-//            }
-//
-//            @Override
-//            public void afterTextChanged(Editable s) {}
-//        });
-//    }
-//
-//    private void getSuggestions(String query) {
-//        String url = "https://nominatim.openstreetmap.org/search?format=json&q=" + Uri.encode(query);
-//
-//        StringRequest request = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
-//            @Override
-//            public void onResponse(String response) {
-//                try {
-//                    JSONArray jsonArray = new JSONArray(response);
-//                    String[] suggestions = new String[jsonArray.length()];
-//
-//                    for (int i = 0; i < jsonArray.length(); i++) {
-//                        JSONObject jsonObject = jsonArray.getJSONObject(i);
-//                        String address = jsonObject.getString("display_name");
-//                        suggestions[i] = address;
-//                    }
-//
-//                    ArrayAdapter<String> adapter = new ArrayAdapter<>(AddItemActivity.this, android.R.layout.simple_dropdown_item_1line, suggestions);
-//                    eventLocation.setAdapter(adapter);
-//                    adapter.notifyDataSetChanged();
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }, new Response.ErrorListener() {
-//            @Override
-//            public void onErrorResponse(VolleyError error) {
-//                error.printStackTrace();
-//            }
-//        });
-//
-//        requestQueue.add(request);
-//    }
 
     private void openAutocompleteActivity() {
         List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS);
