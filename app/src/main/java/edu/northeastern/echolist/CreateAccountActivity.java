@@ -54,7 +54,10 @@ public class CreateAccountActivity extends AppCompatActivity {
 
         User newUser = new User(userId, password);
 
-        databaseReference.child(userId).setValue(newUser)
+        // Use push() to generate a unique key for the user
+        DatabaseReference newUserRef = databaseReference.push();
+        String newUserKey = newUserRef.getKey();
+        newUserRef.setValue(newUser)
                 .addOnSuccessListener(aVoid -> {
                     SharedPreferences sharedPreferences = getSharedPreferences("namePref", MODE_PRIVATE);
                     SharedPreferences.Editor editor = sharedPreferences.edit();
