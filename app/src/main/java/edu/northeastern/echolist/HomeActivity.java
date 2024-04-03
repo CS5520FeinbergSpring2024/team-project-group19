@@ -32,6 +32,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -39,6 +40,9 @@ import java.util.List;
 
 public class HomeActivity extends AppCompatActivity {
     private List<Event> eventsList = new ArrayList<>();
+    private List<Event> sortedEventsList = new ArrayList<>(); // Keeps all events sorted
+    private List<Event> upcomingEventsList = new ArrayList<>(); //Only events to be shown
+    private EventAdapter upcomingEventAdapter;
     private GiftAdapter giftAdapter;
     private List<Gift> trendingGifts = new ArrayList<>();
     protected TextView userIdTextView;
@@ -105,6 +109,41 @@ public class HomeActivity extends AppCompatActivity {
 
             }
         });
+
+        // Upcoming events
+        RecyclerView upcomingEventRecyclerView = findViewById(R.id.upcoming_events_recyclerview);
+        RecyclerView.LayoutManager upcomingLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        upcomingEventRecyclerView.setLayoutManager(upcomingLayoutManager);
+
+        upcomingEventAdapter = new EventAdapter(HomeActivity.this, upcomingEventsList);
+        upcomingEventRecyclerView.setAdapter(upcomingEventAdapter);
+
+        Query upcomingEventsByUser = databaseEvents.orderByChild("userId")
+                .equalTo(userId);
+
+        upcomingEventsByUser.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                handleUpcomingEventChildAdded(snapshot);
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+            }
+        });
+
 
         RecyclerView trendingGiftsRecyclerView = findViewById(R.id.trending_gift_recyclerview);
         RecyclerView.LayoutManager giftLayoutManager = new LinearLayoutManager(this,
@@ -219,5 +258,56 @@ public class HomeActivity extends AppCompatActivity {
         Collections.shuffle(randomGifts);
         return randomGifts.subList(0, Math.min(count, randomGifts.size()));
     }
+
+    private void handleUpcomingEventChildAdded(DataSnapshot snapshot) {
+        Event event = snapshot.getValue(Event.class);
+
+        if (event != null) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            Date eventDate = null;
+            try {
+                eventDate = dateFormat.parse(event.getDate());
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+            // Included to make today inclusive.
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            Date today = calendar.getTime();
+
+            if (eventDate != null && !eventDate.before(today)) {
+                sortedEventsList.add(event);
+                Collections.sort(sortedEventsList, eventDateComparator);
+
+                if (sortedEventsList.size() > 2) {
+                    sortedEventsList.subList(2, sortedEventsList.size()).clear();
+                }
+
+                upcomingEventsList.clear();
+                upcomingEventsList.addAll(sortedEventsList);
+                upcomingEventAdapter.notifyDataSetChanged();
+            }
+        }
+    }
+
+    // Comparator for sorted events.
+    Comparator<Event> eventDateComparator = new Comparator<Event>() {
+        @Override
+        public int compare(Event e1, Event e2) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            try {
+                Date date1 = dateFormat.parse(e1.getDate());
+                Date date2 = dateFormat.parse(e2.getDate());
+                return date1.compareTo(date2);
+            } catch (ParseException e) {
+                e.printStackTrace();
+                return 0;
+            }
+        }
+    };
 
 }
