@@ -74,35 +74,33 @@ public class SignInActivity extends AppCompatActivity {
             return;
         }
 
-        databaseReference.child(userId).addListenerForSingleValueEvent(new ValueEventListener() {
+        databaseReference.orderByChild("userId").equalTo(userId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                User user = dataSnapshot.getValue(User.class);
-                if (user != null && user.getPassword().equals(password)) {
-                    openHomeActivity(user);
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
+                        User user = userSnapshot.getValue(User.class);
+                        if (user != null && user.getPassword().equals(password)) {
+                            openHomeActivity(user);
+                            return;
+                        }
+                    }
+                    // Password does not match
+                    Toast.makeText(SignInActivity.this, "Incorrect password", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast toast = Toast.makeText(SignInActivity.this, "Incorrect user ID or password", Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.CENTER, 0, 0);
-                    toast.show();
-
-
-                    userIdEditText.setBackgroundResource(R.color.errorHighlight);
-                    passwordEditText.setBackgroundResource(R.color.errorHighlight);
-
-                    new Handler().postDelayed(() -> {
-                        userIdEditText.setBackgroundResource(android.R.color.transparent);
-                        passwordEditText.setBackgroundResource(android.R.color.transparent);
-                    }, 2000);
+                    // User does not exist
+                    Toast.makeText(SignInActivity.this, "User not found", Toast.LENGTH_SHORT).show();
                 }
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.e("CheckUserExistInDB","onCancelled" + databaseError);
+                Log.e("SignInActivity", "Database error: " + databaseError.getMessage());
                 Toast.makeText(SignInActivity.this, "Database error: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
+
     private void openHomeActivity(User user) {
         SharedPreferences sharedPreferences = getSharedPreferences("namePref", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();

@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -78,6 +79,16 @@ public class HomeActivity extends AppCompatActivity {
         DatabaseReference databaseEvents = FirebaseDatabase.getInstance().getReference("events");
 
         Query eventsByUser = databaseEvents.orderByChild("userId").equalTo(userId);
+
+        ImageView userIcon = findViewById(R.id.user_icon);
+        userIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Launch ProfileActivity on user icon click
+                Intent intent = new Intent(HomeActivity.this, ProfileActivity.class);
+                startActivity(intent);
+            }
+        });
 
         eventsByUser.addChildEventListener(new ChildEventListener() {
             @Override
