@@ -20,11 +20,11 @@
         android:id="@+id/userId_textview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.939"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/user_icon" />
+        app:layout_constraintEnd_toEndOf="@id/user_icon"
+        android:fontFamily="sans-serif-black"
+        android:textColor="@color/quantum_grey"
+        app:layout_constraintStart_toStartOf="@id/user_icon"
+        app:layout_constraintTop_toBottomOf="@+id/user_icon" />
 
     <ImageView
         android:id="@+id/user_icon"
@@ -41,16 +41,6 @@
         app:srcCompat="@drawable/user"
         tools:ignore="TouchTargetSizeCheck" />
 
-    <TextView
-        android:id="@+id/upcoming_event_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="10dp"
-        android:text="@string/upcoming_events_string"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/userId_textview"/>
-
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/half_screen_guideline"
         android:layout_width="wrap_content"
@@ -58,14 +48,26 @@
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.5" />
 
+    <TextView
+        android:id="@+id/upcoming_event_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:text="@string/upcoming_events_string"
+        app:layout_constraintStart_toStartOf="parent"
+        android:fontFamily="sans-serif-black"
+        android:textSize="10pt"
+        app:layout_constraintTop_toTopOf="@id/userId_textview"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/upcoming_events_recyclerview"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
         android:orientation="horizontal"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintEnd_toStartOf="@id/half_screen_guideline"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/half_screen_guideline"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/upcoming_event_title"
         tools:listitem="@layout/activity_event_item_layout" />
@@ -74,13 +76,11 @@
         android:id="@+id/my_event_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="380dp"
-        android:layout_marginTop="8dp"
+        android:fontFamily="sans-serif-black"
         android:text="@string/my_events_string"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/userId_textview"
-        app:layout_constraintStart_toEndOf="@id/half_screen_guideline"
-        />
+        android:textSize="10pt"
+        app:layout_constraintStart_toStartOf="@+id/half_screen_guideline"
+        app:layout_constraintTop_toTopOf="@+id/upcoming_event_title" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/my_events_recyclerview"
@@ -89,7 +89,8 @@
         android:orientation="horizontal"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/half_screen_guideline"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/half_screen_guideline"
         app:layout_constraintTop_toBottomOf="@id/my_event_title"
         tools:listitem="@layout/activity_event_item_layout" />
 
@@ -98,14 +99,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
-        android:layout_marginTop="200dp"
+        android:layout_marginTop="15dp"
+        android:fontFamily="sans-serif-black"
         android:text="@string/trending_gifts_string"
+        android:textSize="10pt"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/my_event_title" />
+        app:layout_constraintTop_toBottomOf="@+id/my_events_recyclerview" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/trending_gift_recyclerview"
         android:layout_width="0dp"
+        android:layout_marginStart="15dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
