@@ -49,12 +49,15 @@
         android:layout_marginTop="10dp"
         android:text="@string/upcoming_events_string"
         app:layout_constraintStart_toStartOf="parent"
+        android:fontFamily="sans-serif-black"
+        android:textSize="10pt"
         app:layout_constraintTop_toBottomOf="@id/userId_textview"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/upcoming_events_recyclerview"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
         android:orientation="horizontal"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintEnd_toEndOf="parent"
@@ -70,6 +73,8 @@
         android:layout_marginStart="24dp"
         android:layout_marginTop="200dp"
         android:text="@string/my_events_string"
+        android:fontFamily="sans-serif-black"
+        android:textSize="10pt"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/upcoming_event_title" />
 
@@ -78,6 +83,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:layout_marginStart="15dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -92,12 +98,15 @@
         android:layout_marginStart="24dp"
         android:layout_marginTop="200dp"
         android:text="@string/trending_gifts_string"
+        android:fontFamily="sans-serif-black"
+        android:textSize="10pt"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/my_event_title" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/trending_gift_recyclerview"
         android:layout_width="0dp"
+        android:layout_marginStart="15dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
