@@ -9,7 +9,12 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> {
     private List<Event> eventsList;
@@ -29,7 +34,20 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
     public void onBindViewHolder(ViewHolder holder, int position) {
         Event event = eventsList.get(position);
         holder.titleTextView.setText(event.getTitle());
-        holder.dateTextView.setText(event.getDate());
+
+        SimpleDateFormat originalDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        Date date = null;
+        try {
+            date = originalDate.parse(event.getDate());
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        DateFormat newFormat = new SimpleDateFormat("MMMM d, yyyy", Locale.getDefault());
+        String newDate = newFormat.format(date);
+
+
+
+        holder.dateTextView.setText(newDate);
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
