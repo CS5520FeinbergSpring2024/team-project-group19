@@ -54,6 +54,7 @@ public class AddItemActivity extends AppCompatActivity {
     private Button updateEventButton;
     private BottomNavigationView bottomNavigationView;
     private static final int AUTOCOMPLETE_REQUEST_CODE = 1;
+    private Button wishlistButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,14 +85,16 @@ public class AddItemActivity extends AppCompatActivity {
         deleteEventButton = findViewById(R.id.deleteEventButton);
         updateEventButton = findViewById(R.id.updateEventButton);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
+        wishlistButton = findViewById(R.id.wishlistButton);
+
 
 
         eventDate.setOnClickListener(new View.OnClickListener() {
-            @Override
+                    @Override
                     public void onClick(View v) {
                         showDateDialog();
                     }
-        });
+                });
 
         eventLocation.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -126,7 +129,6 @@ public class AddItemActivity extends AppCompatActivity {
                                 snapshot.getRef().setValue(event).addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void unused) {
-
                                     }
                                 }).addOnFailureListener(new OnFailureListener() {
                                     @Override
@@ -154,6 +156,14 @@ public class AddItemActivity extends AppCompatActivity {
             updateEventButton.setVisibility(View.VISIBLE);
             saveEventButton.setVisibility(View.GONE);
             getEventDetailsAndUpdate(eventId);
+            wishlistButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(AddItemActivity.this, MyListActivity.class);
+                    intent.putExtra("eventId", eventId);
+                    startActivity(intent);
+                }
+            });
         }
 
         deleteEventButton.setOnClickListener(new View.OnClickListener() {
@@ -230,6 +240,7 @@ public class AddItemActivity extends AppCompatActivity {
             }
             return false;
         });
+
 
         if (!Places.isInitialized()) {
             Places.initialize(getApplicationContext(), "AIzaSyDAa1Wd5O8dpjeh1RdozE2_x221_tWiX00");

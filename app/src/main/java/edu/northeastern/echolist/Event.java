@@ -1,13 +1,19 @@
 package edu.northeastern.echolist;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Event {
     private String eventId;
     private String title;
     private String location;
     private String date;
     private String userId;
+    private List<String> wishListIds;
 
-    public Event() {}
+    public Event() {
+        this.wishListIds = new ArrayList<>();
+    }
 
     public Event(String eventId, String userId, String title, String location, String date) {
         this.eventId = eventId;

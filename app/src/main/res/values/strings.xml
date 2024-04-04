@@ -9,4 +9,6 @@
     <string name="user_icon_string">user icon</string>
     <string name="gift_name_placeholder_string">Gift Name</string>
     <string name="image_description_placeholder_string">Image description</string>
+    <string name="wishlist_string">Wish List</string>
+    <item name="wishList_title" type="id" />
 </resources>
