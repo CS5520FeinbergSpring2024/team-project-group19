@@ -191,7 +191,7 @@ public class HomeActivity extends AppCompatActivity {
             snackbar.setAction("Undo", new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Event restoredEvent = new Event(eventId, userId, eventTitle, eventLocation, eventDate);
+                    Event restoredEvent = new Event(eventId, userId, eventTitle, eventLocation, eventDate, "","");
 
                     DatabaseReference databaseEvents = FirebaseDatabase.getInstance().getReference("events");
                     databaseEvents.child(eventId).setValue(restoredEvent).addOnSuccessListener(new OnSuccessListener<Void>() {
