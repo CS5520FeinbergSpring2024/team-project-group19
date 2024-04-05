@@ -253,7 +253,7 @@ public class HomeActivity extends AppCompatActivity {
                             }
                         }
                         // randomly select gifts from the trendingGifts list
-                        List<Gift> selectedGifts = getRandomGifts(trendingGifts, 3); // select 3 random gifts
+                        List<Gift> selectedGifts = getRandomGifts(trendingGifts, 5); // select 5 random gifts
                         // update the UI with the selected gifts
                         giftAdapter.setGifts(selectedGifts);
                     }
