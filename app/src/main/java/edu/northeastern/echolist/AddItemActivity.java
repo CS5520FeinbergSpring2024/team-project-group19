@@ -14,6 +14,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
@@ -54,6 +55,7 @@ public class AddItemActivity extends AppCompatActivity {
     private Button updateEventButton;
     private BottomNavigationView bottomNavigationView;
     private static final int AUTOCOMPLETE_REQUEST_CODE = 1;
+    private Button wishlistButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +76,11 @@ public class AddItemActivity extends AppCompatActivity {
 
         DatabaseReference databaseEvents = FirebaseDatabase.getInstance().getReference("events");
 
+
+
+
+
+
         saveEventButton = findViewById(R.id.saveEventButton);
         eventTitle = findViewById(R.id.eventTitle);
         eventLocation = findViewById(R.id.eventLocation);
@@ -84,14 +91,26 @@ public class AddItemActivity extends AppCompatActivity {
         deleteEventButton = findViewById(R.id.deleteEventButton);
         updateEventButton = findViewById(R.id.updateEventButton);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
+        wishlistButton = findViewById(R.id.wishlistButton);
+
+
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.event_categories, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        categorySpinner.setAdapter(adapter);
+
+        ArrayAdapter<CharSequence> visibilityAdapter = ArrayAdapter.createFromResource(this,
+                R.array.visibility_options, android.R.layout.simple_spinner_item);
+        visibilityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        visibilitySpinner.setAdapter(visibilityAdapter);
 
 
         eventDate.setOnClickListener(new View.OnClickListener() {
-            @Override
+                    @Override
                     public void onClick(View v) {
                         showDateDialog();
                     }
-        });
+                });
 
         eventLocation.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -107,6 +126,8 @@ public class AddItemActivity extends AppCompatActivity {
                         String title = eventTitle.getText().toString();
                         String location = eventLocation.getText().toString();
                         String date = eventDate.getText().toString();
+                        String category = categorySpinner.getSelectedItem().toString();
+                        String visibility = visibilitySpinner.getSelectedItem().toString();
 
                         if (title.isEmpty() || date.isEmpty()) {
                             new AlertDialog.Builder(AddItemActivity.this)
@@ -118,7 +139,7 @@ public class AddItemActivity extends AppCompatActivity {
                         }
 
                         String eventId = databaseEvents.push().getKey();
-                        Event event = new Event(eventId, userId, title, location, date);
+                        Event event = new Event(eventId, userId, title, location,date,category,visibility);
 
                         databaseEvents.child(eventId).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
@@ -126,7 +147,6 @@ public class AddItemActivity extends AppCompatActivity {
                                 snapshot.getRef().setValue(event).addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void unused) {
-
                                     }
                                 }).addOnFailureListener(new OnFailureListener() {
                                     @Override
@@ -154,6 +174,14 @@ public class AddItemActivity extends AppCompatActivity {
             updateEventButton.setVisibility(View.VISIBLE);
             saveEventButton.setVisibility(View.GONE);
             getEventDetailsAndUpdate(eventId);
+            wishlistButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(AddItemActivity.this, MyListActivity.class);
+                    intent.putExtra("eventId", eventId);
+                    startActivity(intent);
+                }
+            });
         }
 
         deleteEventButton.setOnClickListener(new View.OnClickListener() {
@@ -173,7 +201,7 @@ public class AddItemActivity extends AppCompatActivity {
                                         if (event != null) {
                                             Event deletedEvent = new Event(event.getEventId(),
                                                     event.getUserId(), event.getTitle(),
-                                                    event.getLocation(), event.getDate());
+                                                    event.getLocation(), event.getDate(),event.getCategory(),event.getVisibility());
 
                                             snapshot.getRef().removeValue()
                                                     .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -231,6 +259,7 @@ public class AddItemActivity extends AppCompatActivity {
             return false;
         });
 
+
         if (!Places.isInitialized()) {
             Places.initialize(getApplicationContext(), "AIzaSyDAa1Wd5O8dpjeh1RdozE2_x221_tWiX00");
         }
@@ -262,6 +291,16 @@ public class AddItemActivity extends AppCompatActivity {
                     eventTitle.setText(event.getTitle());
                     eventLocation.setText(event.getLocation());
                     eventDate.setText(event.getDate());
+                    if (event.getCategory() != null) {
+                        ArrayAdapter<CharSequence> adapter = (ArrayAdapter<CharSequence>) categorySpinner.getAdapter();
+                        int position = adapter.getPosition(event.getCategory());
+                        categorySpinner.setSelection(position);
+                    }
+                    if (event.getVisibility() != null) {
+                        ArrayAdapter<CharSequence> visibilityAdapter = (ArrayAdapter<CharSequence>) visibilitySpinner.getAdapter();
+                        int visibilityPosition = visibilityAdapter.getPosition(event.getVisibility());
+                        visibilitySpinner.setSelection(visibilityPosition);
+                    }
 
                     updateEventButton.setOnClickListener(new View.OnClickListener() {
                         @Override
@@ -269,6 +308,10 @@ public class AddItemActivity extends AppCompatActivity {
                             String updatedTitle = eventTitle.getText().toString();
                             String updatedLocation = eventLocation.getText().toString();
                             String updatedDate = eventDate.getText().toString();
+                            String updatedCategory = categorySpinner.getSelectedItem().toString();
+                            String updatedVisibility = visibilitySpinner.getSelectedItem().toString();
+
+
 
                             if (updatedTitle.isEmpty() || updatedDate.isEmpty()) {
                                 new AlertDialog.Builder(AddItemActivity.this)
@@ -284,6 +327,10 @@ public class AddItemActivity extends AppCompatActivity {
 
                             eventRef.child("title").setValue(updatedTitle);
                             eventRef.child("location").setValue(updatedLocation);
+                            eventRef.child("category").setValue(updatedCategory);
+                            eventRef.child("visibility").setValue(updatedVisibility);
+
+
                             eventRef.child("date").setValue(updatedDate).addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void unused) {
