@@ -60,6 +60,7 @@ public class HomeActivity extends AppCompatActivity {
         NavigationRouter navigationRouter = new NavigationRouter(bottomNavigationView, this);
         navigationRouter.initNavigation();
 
+
         // Retrieve the user ID from sharedPreference
         SharedPreferences sharedPreferences = getSharedPreferences("namePref", MODE_PRIVATE);
         String userId = sharedPreferences.getString("username", "User");
