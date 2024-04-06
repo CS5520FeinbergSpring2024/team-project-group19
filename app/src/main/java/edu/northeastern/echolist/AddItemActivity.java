@@ -363,13 +363,9 @@ public class AddItemActivity extends AppCompatActivity {
     public void onBackPressed() {
         new AlertDialog.Builder(this)
                 .setMessage("Are you sure you want to exit? The data will not be saved once you exit.")
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Intent intent = new Intent(AddItemActivity.this, HomeActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
-                    }
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    dialog.dismiss();
+                    AddItemActivity.super.onBackPressed();
                 })
                 .setNegativeButton("No", null)
                 .show();
