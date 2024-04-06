@@ -27,6 +27,21 @@
         app:layout_constraintTop_toBottomOf="@id/user_icon" />
 
     <ImageView
+        android:id="@+id/echolist_logo"
+        android:layout_width="150dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="20dp"
+        android:clickable="false"
+        android:contentDescription="@string/echolist_logo_string"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintTop_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/echolist"
+        tools:ignore="TouchTargetSizeCheck" />
+
+    <ImageView
         android:id="@+id/user_icon"
         android:layout_width="48dp"
         android:layout_height="36dp"
