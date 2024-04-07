@@ -67,6 +67,11 @@ public class MyListActivity extends AppCompatActivity {
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
                 return true;
+            } else if (item.getItemId() == R.id.page_add_post) {
+                Intent intent = new Intent(MyListActivity.this, AddItemActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                return true;
             }
             return false;
         });
