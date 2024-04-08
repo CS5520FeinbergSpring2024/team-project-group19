@@ -7,13 +7,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.os.Bundle;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class MyListActivity extends AppCompatActivity {
-    private FloatingActionButton fabAddWishListItem;
     private WishListAdapter wishListAdapter;
     private RecyclerView wishListRecyclerView;
     private RecyclerView.LayoutManager lLayoutManager;
@@ -27,7 +25,6 @@ public class MyListActivity extends AppCompatActivity {
 
         eventId = getIntent().getStringExtra("eventId");
 
-        fabAddWishListItem = findViewById(R.id.fabAddWishListItem);
         wishListRecyclerView = findViewById(R.id.wishlist_recyclerview);
 
         wishListRecyclerView.setLayoutManager(new LinearLayoutManager(this));
