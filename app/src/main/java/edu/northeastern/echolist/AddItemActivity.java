@@ -42,30 +42,16 @@ public class AddItemActivity extends AppCompatActivity {
     private Spinner categorySpinner;
     private Spinner visibilitySpinner;
     private Spinner friendsSpinner;
-    private boolean textEntered;
+    private NavigationRouter navigationRouter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_item);
 
+        // init navigation
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
-        bottomNavigationView.setSelectedItemId(R.id.page_add_post);
-        bottomNavigationView.setOnItemSelectedListener(item -> {
-            if (item.getItemId() == R.id.page_home || item.getItemId() == R.id.page_view_posts) {
-                new AlertDialog.Builder(this)
-                        .setMessage("Are you sure you want to exit? The data will not be saved once you exit.")
-                        .setPositiveButton("Yes", (dialog, which) -> {
-                            dialog.dismiss();
-                            AddItemActivity.super.onBackPressed();
-                        })
-                        .setNegativeButton("No", null)
-                        .show();
-                return true;
-            }
-            return false;
-        });
-        NavigationRouter navigationRouter = new NavigationRouter(bottomNavigationView, this);
+        navigationRouter = new NavigationRouter(bottomNavigationView, this);
         navigationRouter.initNavigation();
 
         SharedPreferences sharedPreferences = getSharedPreferences("namePref", MODE_PRIVATE);
@@ -88,7 +74,7 @@ public class AddItemActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 // Update the flag based on whether any text is entered
-                textEntered = !TextUtils.isEmpty(s);
+                navigationRouter.setTextEntered(!TextUtils.isEmpty(s));
             }
 
             @Override
@@ -209,7 +195,7 @@ public class AddItemActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (!textEntered) {
+        if (!navigationRouter.isTextEntered()) {
             super.onBackPressed();
             return;
         }
