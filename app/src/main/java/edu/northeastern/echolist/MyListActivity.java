@@ -45,15 +45,6 @@ public class MyListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my_list);
 
-        eventId = getIntent().getStringExtra("eventId");
-
-        fabAddWishListItem = findViewById(R.id.fabAddWishListItem);
-        wishListRecyclerView = findViewById(R.id.wishlist_recyclerview);
-
-        wishListRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        wishListAdapter = new WishListAdapter(this, wishList);
-        wishListRecyclerView.setAdapter(wishListAdapter);
-
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setSelectedItemId(R.id.page_view_posts);
         NavigationRouter navigationRouter = new NavigationRouter(bottomNavigationView, this);
@@ -75,15 +66,6 @@ public class MyListActivity extends AppCompatActivity {
             }
             return false;
         });
-    }
-
-
-    private void emptyEntryDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Error");
-        builder.setMessage("Please enter name of the item");
-        builder.setPositiveButton("OK", null);
-        builder.create().show();
     }
 
 }

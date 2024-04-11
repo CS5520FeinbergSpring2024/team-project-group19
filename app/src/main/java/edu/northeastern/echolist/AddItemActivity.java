@@ -76,11 +76,6 @@ public class AddItemActivity extends AppCompatActivity {
 
         DatabaseReference databaseEvents = FirebaseDatabase.getInstance().getReference("events");
 
-
-
-
-
-
         saveEventButton = findViewById(R.id.saveEventButton);
         eventTitle = findViewById(R.id.eventTitle);
         eventLocation = findViewById(R.id.eventLocation);
@@ -177,7 +172,7 @@ public class AddItemActivity extends AppCompatActivity {
             wishlistButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(AddItemActivity.this, MyListActivity.class);
+                    Intent intent = new Intent(AddItemActivity.this, WishListActivity.class);
                     intent.putExtra("eventId", eventId);
                     startActivity(intent);
                 }
