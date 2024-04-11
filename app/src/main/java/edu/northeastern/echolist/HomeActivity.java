@@ -60,6 +60,7 @@ public class HomeActivity extends AppCompatActivity {
         NavigationRouter navigationRouter = new NavigationRouter(bottomNavigationView, this);
         navigationRouter.initNavigation();
 
+
         // Retrieve the user ID from sharedPreference
         SharedPreferences sharedPreferences = getSharedPreferences("namePref", MODE_PRIVATE);
         String userId = sharedPreferences.getString("username", "User");
@@ -191,7 +192,7 @@ public class HomeActivity extends AppCompatActivity {
             snackbar.setAction("Undo", new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Event restoredEvent = new Event(eventId, userId, eventTitle, eventLocation, eventDate);
+                    Event restoredEvent = new Event(eventId, userId, eventTitle, eventLocation, eventDate, "","");
 
                     DatabaseReference databaseEvents = FirebaseDatabase.getInstance().getReference("events");
                     databaseEvents.child(eventId).setValue(restoredEvent).addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -253,7 +254,7 @@ public class HomeActivity extends AppCompatActivity {
                             }
                         }
                         // randomly select gifts from the trendingGifts list
-                        List<Gift> selectedGifts = getRandomGifts(trendingGifts, 3); // select 3 random gifts
+                        List<Gift> selectedGifts = getRandomGifts(trendingGifts, 5); // select 5 random gifts
                         // update the UI with the selected gifts
                         giftAdapter.setGifts(selectedGifts);
                     }

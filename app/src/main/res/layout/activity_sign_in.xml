@@ -11,19 +11,47 @@
         android:layout_height="wrap_content"
         android:paddingBottom="16dp">
 
+
+        <TextView
+            android:id="@+id/welcomeTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="48dp"
+            android:text="@string/welcome_string"
+            android:textAlignment="center"
+            android:textSize="24sp" />
+
+
+        <ImageView
+            android:id="@+id/echolist_logo"
+            android:layout_width="160dp"
+            android:layout_height="60dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"
+            android:layout_marginTop="8dp"
+            android:layout_below="@+id/welcomeTextView"
+            android:clickable="false"
+            android:contentDescription="@string/echolist_logo_string"
+            app:srcCompat="@drawable/echolist"
+            tools:ignore="TouchTargetSizeCheck" />
+
         <EditText
             android:id="@+id/userIdEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="User ID"
+            android:hint="@string/user_id_hint_string"
             android:inputType="text"
-            android:layout_margin="16dp"/>
+            android:layout_margin="16dp"
+            android:layout_below="@+id/echolist_logo" />
 
         <EditText
             android:id="@+id/passwordEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Password"
+            android:hint="@string/password_hint_string"
             android:inputType="textPassword"
             android:layout_below="@id/userIdEditText"
             android:layout_marginTop="8dp"
@@ -34,7 +62,7 @@
             android:id="@+id/signInButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Sign In"
+            android:text="@string/sign_in_string"
             android:layout_below="@id/passwordEditText"
             android:layout_marginTop="16dp"
             android:layout_marginStart="16dp"
@@ -44,7 +72,7 @@
             android:id="@+id/createAccountButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Create Account"
+            android:text="@string/create_account_string"
             android:layout_below="@id/signInButton"
             android:layout_marginTop="8dp"
             android:layout_marginStart="16dp"

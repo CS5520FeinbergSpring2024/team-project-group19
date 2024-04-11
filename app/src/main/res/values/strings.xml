@@ -9,4 +9,37 @@
     <string name="user_icon_string">user icon</string>
     <string name="gift_name_placeholder_string">Gift Name</string>
     <string name="image_description_placeholder_string">Image description</string>
+    <string name="echolist_logo_string">Echolist logo</string>
+    <string name="user_id_hint_string">User ID</string>
+    <string name="password_hint_string">Password</string>
+    <string name="sign_in_string">Sign In</string>
+    <string name="create_account_string">Create Account</string>
+    <string name="welcome_string">Welcome to</string>
+
+    <string-array name="event_categories">
+        <item>Birthday</item>
+        <item>Wedding</item>
+        <item>House Warming</item>
+        <item>Anniversary</item>
+        <item>Graduation</item>
+        <item>Networking Event</item>
+        <item>Fundraiser</item>
+    </string-array>
+  
+    <string-array name="visibility_options">
+        <item>Public</item>
+        <item>Private</item>
+    </string-array>
+  
+    <string name="wishlist_string">Wish List</string>
+    <string name="save_event">Save Event</string>
+    <string name="visibility">Visibility</string>
+    <string name="category">Category</string>
+    <string name="friends">Friends</string>
+    <string name="select_date">Select Date</string>
+    <string name="location">Location</string>
+    <string name="title">Title</string>
+    <item name="wishList_title" type="id" />
+
+
 </resources>
