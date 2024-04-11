@@ -1,5 +1,7 @@
 package edu.northeastern.echolist;
 
+import java.io.Serializable;
+
 public class WishListItem {
     private String id;
     private String name;

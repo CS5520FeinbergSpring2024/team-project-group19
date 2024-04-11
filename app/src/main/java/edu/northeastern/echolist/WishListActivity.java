@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -212,6 +213,7 @@ public class WishListActivity extends AppCompatActivity {
         builder.setPositiveButton("OK", null);
         builder.create().show();
     }
+
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {

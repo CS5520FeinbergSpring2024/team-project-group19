@@ -152,8 +152,9 @@
         android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:text="Go to Wishlist"
-        android:layout_marginTop="24dp"
-        app:layout_constraintTop_toBottomOf="@id/visibilitySpinner"
+        android:layout_marginTop="10dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/updateEventButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -163,16 +164,26 @@
         android:layout_height="wrap_content"
         android:text="Save Event"
         android:layout_marginTop="24dp"
-        app:layout_constraintTop_toBottomOf="@id/wishlistButton"
+        app:layout_constraintTop_toBottomOf="@id/visibilitySpinner"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
+            <Button
+                android:id="@+id/cancelButton"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:text="Cancel"
+                android:layout_marginTop="10dp"
+                app:layout_constraintTop_toBottomOf="@id/deleteEventButton"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
     <Button
         android:id="@+id/updateEventButton"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:text="Update Event"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="10dp"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/saveEventButton"
         app:layout_constraintStart_toStartOf="parent"
@@ -183,11 +194,13 @@
         android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:text="Delete Event"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="10dp"
         android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/updateEventButton"
+        app:layout_constraintTop_toBottomOf="@id/wishlistButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
+
+
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
