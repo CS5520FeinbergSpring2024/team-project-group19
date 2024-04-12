@@ -19,6 +19,7 @@ import android.provider.MediaStore;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -40,11 +41,11 @@ public class ProfileActivity extends AppCompatActivity {
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int REQUEST_IMAGE_PICK = 2;
     private static final int REQUEST_CAMERA_PERMISSION = 3;
-
     private TextView userIdTextView;
     private ImageView profileImageView;
     private String userId;
     private Button addFriendButton;
+    private String friendUserId; // String that contains the selected friendID
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,16 +74,59 @@ public class ProfileActivity extends AppCompatActivity {
         addFriendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                addFriend(view);
+                addFriendAction(view);
             }
         });
     }
 
 
-    public void addFriend(View view) {
+    public void addFriendAction(View view){
+            showUserSelectionDialog(); //Popping up dialog to pick from
+    }
 
-        String friendUserId = "myfriend"; // Hardcoded ID, to be modified.
+    private void showUserSelectionDialog() {
         DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
+        usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                List<String> userIds = new ArrayList<>();
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    String currentUserId = snapshot.child("userId").getValue(String.class);
+                    if (currentUserId != null && !currentUserId.equals(userId)) {
+                        userIds.add(currentUserId);
+                    }
+                }
+                // Show dialog with users
+                AlertDialog.Builder builder = new AlertDialog.Builder(ProfileActivity.this);
+                builder.setTitle("Current users");
+
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(ProfileActivity.this, android.R.layout.simple_list_item_1, userIds);
+                builder.setAdapter(adapter, (dialog, which) -> {
+                    friendUserId = userIds.get(which); // Set the selected user ID to friendUserId variable
+                    addFriend();
+                });
+
+                builder.setNegativeButton("Cancel", (dialog, which) -> {
+                    dialog.dismiss();
+                });
+                builder.show();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(ProfileActivity.this, "Failed to retrieve user IDs: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+    public void addFriend() {
+        if (friendUserId == null) {
+            return;
+        }
+
+        DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
+
         usersRef.orderByChild("userId").equalTo(userId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -95,7 +139,7 @@ public class ProfileActivity extends AppCompatActivity {
                             usersRef.child(snapshot.getKey()).setValue(currentUser)
                                     .addOnSuccessListener(aVoid -> {
                                         // Friend added successfully
-                                        Toast.makeText(ProfileActivity.this, "myfriend added successfully", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(ProfileActivity.this, friendUserId + " added successfully", Toast.LENGTH_SHORT).show();
                                     })
                                     .addOnFailureListener(e -> {
                                         // Failed to add friend, handle error
@@ -114,7 +158,11 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
 
+
+
+        //Here i have to update the added friend list.
     }
+
 
     private void showImageSelectionOptions() {
         CharSequence[] options = {"Take Photo", "Choose from Gallery", "Cancel"};
