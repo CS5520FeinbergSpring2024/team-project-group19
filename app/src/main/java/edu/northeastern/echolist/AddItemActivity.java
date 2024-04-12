@@ -38,8 +38,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
@@ -58,7 +56,6 @@ public class AddItemActivity extends AppCompatActivity {
     private BottomNavigationView bottomNavigationView;
     private static final int AUTOCOMPLETE_REQUEST_CODE = 1;
     private Button wishlistButton;
-    private Button cancelButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,6 +76,11 @@ public class AddItemActivity extends AppCompatActivity {
 
         DatabaseReference databaseEvents = FirebaseDatabase.getInstance().getReference("events");
 
+
+
+
+
+
         saveEventButton = findViewById(R.id.saveEventButton);
         eventTitle = findViewById(R.id.eventTitle);
         eventLocation = findViewById(R.id.eventLocation);
@@ -90,7 +92,6 @@ public class AddItemActivity extends AppCompatActivity {
         updateEventButton = findViewById(R.id.updateEventButton);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         wishlistButton = findViewById(R.id.wishlistButton);
-        cancelButton = findViewById(R.id.cancelButton);
 
 
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
@@ -167,18 +168,16 @@ public class AddItemActivity extends AppCompatActivity {
                     }
                 });
 
-
         String eventId = getIntent().getStringExtra("eventId");
         if (eventId != null) {
             deleteEventButton.setVisibility(View.VISIBLE);
             updateEventButton.setVisibility(View.VISIBLE);
-            wishlistButton.setVisibility(View.VISIBLE);
             saveEventButton.setVisibility(View.GONE);
             getEventDetailsAndUpdate(eventId);
             wishlistButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(AddItemActivity.this, WishListActivity.class);
+                    Intent intent = new Intent(AddItemActivity.this, MyListActivity.class);
                     intent.putExtra("eventId", eventId);
                     startActivity(intent);
                 }
@@ -225,23 +224,6 @@ public class AddItemActivity extends AppCompatActivity {
                                                     Toast.makeText(AddItemActivity.this, "Failed to delete event: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                                                 }
                                             });
-
-                                            // delete wish list as well
-                                            DatabaseReference wishlistRef = FirebaseDatabase.getInstance().getReference("wishlists").child(eventId);
-                                            wishlistRef.removeValue().addOnSuccessListener(new OnSuccessListener<Void>() {
-                                                @Override
-                                                public void onSuccess(Void aVoid) {
-                                                    Intent intent = new Intent(AddItemActivity.this, HomeActivity.class);
-                                                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                                    startActivity(intent);
-                                                    finish();
-                                                }
-                                            }).addOnFailureListener(new OnFailureListener() {
-                                                @Override
-                                                public void onFailure(@NonNull Exception e) {
-                                                    Toast.makeText(AddItemActivity.this, "Failed to delete wishlist: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                                                }
-                                            });
                                         }
                                     }
 
@@ -257,49 +239,25 @@ public class AddItemActivity extends AppCompatActivity {
             }
         });
 
-        cancelButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(AddItemActivity.this, HomeActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-            }
-        });
-
-
-
         bottomNavigationView.setSelectedItemId(R.id.page_add_post);
-//        bottomNavigationView.setOnItemSelectedListener(item -> {
-//            new AlertDialog.Builder(this)
-//                    .setMessage("Are you sure you want to exit? The data will not be saved once you exit.")
-//                    .setPositiveButton("Yes", (dialog, which) -> {
-//                        Intent intent = null;
-//                        if (item.getItemId() == R.id.page_home) {
-//                            intent = new Intent(AddItemActivity.this, HomeActivity.class);
-//                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//                            startActivity(intent);
-//                        } else if (item.getItemId() == R.id.page_view_posts) {
-//                            intent = new Intent(AddItemActivity.this, MyListActivity.class);
-//                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//                            startActivity(intent);
-//                        }
-//                    })
-//                    .setNegativeButton("No", null)
-//                    .show();
-//
-//            return false;
-//        });
         bottomNavigationView.setOnItemSelectedListener(item -> {
-            if (item.getItemId() == R.id.page_home) {
-                Intent intent = new Intent(AddItemActivity.this, HomeActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                return true;
-            } else if (item.getItemId() == R.id.page_view_posts) {
-                Intent intent = new Intent(AddItemActivity.this, MyListActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-            }
+            new AlertDialog.Builder(this)
+                    .setMessage("Are you sure you want to exit? The data will not be saved once you exit.")
+                    .setPositiveButton("Yes", (dialog, which) -> {
+                        Intent intent = null;
+                        if (item.getItemId() == R.id.page_home) {
+                            intent = new Intent(AddItemActivity.this, HomeActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            startActivity(intent);
+                        } else if (item.getItemId() == R.id.page_view_posts) {
+                            intent = new Intent(AddItemActivity.this, MyListActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            startActivity(intent);
+                        }
+                    })
+                    .setNegativeButton("No", null)
+                    .show();
+
             return false;
         });
 
@@ -391,8 +349,6 @@ public class AddItemActivity extends AppCompatActivity {
                                     Toast.makeText(AddItemActivity.this, "Failed to update event: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                                 }
                             });
-
-
                         }
                     });
 
@@ -408,9 +364,18 @@ public class AddItemActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        Intent intent = new Intent(AddItemActivity.this, HomeActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
+        new AlertDialog.Builder(this)
+                .setMessage("Are you sure you want to exit? The data will not be saved once you exit.")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent intent = new Intent(AddItemActivity.this, HomeActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                    }
+                })
+                .setNegativeButton("No", null)
+                .show();
     }
 
 

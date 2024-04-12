@@ -32,6 +32,13 @@
     </string-array>
   
     <string name="wishlist_string">Wish List</string>
+    <string name="save_event">Save Event</string>
+    <string name="visibility">Visibility</string>
+    <string name="category">Category</string>
+    <string name="friends">Friends</string>
+    <string name="select_date">Select Date</string>
+    <string name="location">Location</string>
+    <string name="title">Title</string>
     <item name="wishList_title" type="id" />
 
 
