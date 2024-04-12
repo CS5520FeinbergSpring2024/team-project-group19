@@ -1,13 +1,16 @@
 package edu.northeastern.echolist;
 
+import android.widget.Button;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class User {
     private String userId;
     private String password;
     private String profileImageUrl;
     private String profileImageData; // Add this field for base64-encoded image data
-
-
-
+    private List<String> friends; // List of friends
 
     public User() {
 
@@ -51,5 +54,23 @@ public class User {
         this.profileImageData = profileImageData;
     }
 
+    // Methods for adding and delete friends.
+    public void addFriend(String friendUserId) {
+        if (friends == null) {
+            friends = new ArrayList<>();
+        }
+        if (!friends.contains(friendUserId)) {
+            friends.add(friendUserId);
+        }
+    }
 
+    public List<String> getFriends() {
+        return friends;
+    }
+
+    public void removeFriend(String friendUserId) {
+        if (friends != null) {
+            friends.remove(friendUserId);
+        }
+    }
 }

@@ -18,6 +18,8 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Base64;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,6 +33,8 @@ import com.google.firebase.database.ValueEventListener;
 
 
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProfileActivity extends AppCompatActivity {
     private static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -40,6 +44,7 @@ public class ProfileActivity extends AppCompatActivity {
     private TextView userIdTextView;
     private ImageView profileImageView;
     private String userId;
+    private Button addFriendButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +52,7 @@ public class ProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_profile);
         userIdTextView = findViewById(R.id.userId_textview);
         profileImageView = findViewById(R.id.profile_image);
-
+        addFriendButton = findViewById(R.id.add_friend_button);
 
         SharedPreferences sharedPreferences = getSharedPreferences("namePref", MODE_PRIVATE);
         userId = sharedPreferences.getString("username", "User not found");
@@ -63,10 +68,53 @@ public class ProfileActivity extends AppCompatActivity {
         profileImageView.setOnClickListener(view -> {
             showImageSelectionOptions();
         });
+
+
+        addFriendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                addFriend(view);
+            }
+        });
     }
 
 
+    public void addFriend(View view) {
 
+        String friendUserId = "myfriend"; // Hardcoded ID, to be modified.
+        DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
+        usersRef.orderByChild("userId").equalTo(userId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        User currentUser = snapshot.getValue(User.class);
+                        if (currentUser != null) {
+                            currentUser.addFriend(friendUserId);
+
+                            usersRef.child(snapshot.getKey()).setValue(currentUser)
+                                    .addOnSuccessListener(aVoid -> {
+                                        // Friend added successfully
+                                        Toast.makeText(ProfileActivity.this, "myfriend added successfully", Toast.LENGTH_SHORT).show();
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        // Failed to add friend, handle error
+                                        Toast.makeText(ProfileActivity.this, "Failed to add friend: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    });
+                        }
+                    }
+                } else {
+                    Toast.makeText(ProfileActivity.this, "User not found in database", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(ProfileActivity.this, "Database error: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+    }
 
     private void showImageSelectionOptions() {
         CharSequence[] options = {"Take Photo", "Choose from Gallery", "Cancel"};
