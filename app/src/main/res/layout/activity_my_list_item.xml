@@ -31,6 +31,16 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
+        <TextView
+            android:id="@+id/event_date"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="YYYY-MM-DD"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            app:layout_constraintTop_toBottomOf="@id/event_title"
+            app:layout_constraintStart_toStartOf="@id/event_title"
+            app:layout_constraintEnd_toEndOf="@id/event_title" />
+
         <Button
             android:id="@+id/editbutton"
             android:layout_width="66dp"

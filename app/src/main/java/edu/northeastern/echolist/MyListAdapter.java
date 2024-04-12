@@ -31,6 +31,7 @@ public class MyListAdapter extends RecyclerView.Adapter<MyListAdapter.ViewHolder
     public void onBindViewHolder(MyListAdapter.ViewHolder holder, int position) {
         Event event = eventsList.get(position);
         holder.titleTextView.setText(event.getTitle());
+        holder.dateTextView.setText(event.getDate());
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -60,12 +61,13 @@ public class MyListAdapter extends RecyclerView.Adapter<MyListAdapter.ViewHolder
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView titleTextView;
-        private MyListAdapter myListAdapter;
+        public TextView dateTextView;
         public Button editButton;
 
         public ViewHolder(View itemView, MyListAdapter listAdapter) {
             super(itemView);
             this.titleTextView = itemView.findViewById(R.id.event_title);
+            dateTextView = itemView.findViewById(R.id.event_date);
             this.editButton = itemView.findViewById(R.id.editbutton);
 
             editButton.setOnClickListener(new View.OnClickListener() {
