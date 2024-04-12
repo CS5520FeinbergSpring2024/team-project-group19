@@ -191,6 +191,10 @@ public class WishListActivity extends AppCompatActivity {
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(intent);
                         return true;
+                    } else if (item.getItemId() == R.id.page_view_posts) {
+                        Intent intent = new Intent(WishListActivity.this, MyListActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
                     }
                     return false;
                 });
