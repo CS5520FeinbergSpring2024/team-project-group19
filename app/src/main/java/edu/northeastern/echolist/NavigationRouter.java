@@ -24,7 +24,7 @@ public class NavigationRouter {
         bottomNavigationView.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.page_home) {
                 if (!currentActivity.getClass().equals(HomeActivity.class)) {
-                    if (currentActivity.getClass().equals(AddItemActivity.class) && textEntered) {
+                    if (currentActivity.getClass().equals(NewItemActivity.class) && textEntered) {
                         new AlertDialog.Builder(currentActivity)
                                 .setMessage("Are you sure you want to exit? The data will not be saved once you exit.")
                                 .setPositiveButton("Yes", (dialog, which) -> {
@@ -38,13 +38,13 @@ public class NavigationRouter {
                     return true;
                 }
             } else if (item.getItemId() == R.id.page_add_post) {
-                if (!currentActivity.getClass().equals(AddItemActivity.class)) {
-                    navigate(AddItemActivity.class);
+                if (!currentActivity.getClass().equals(NewItemActivity.class)) {
+                    navigate(NewItemActivity.class);
                     return true;
                 }
             } else if (item.getItemId() == R.id.page_view_posts) {
                 if (!currentActivity.getClass().equals(MyListActivity.class)) {
-                    if (currentActivity.getClass().equals(AddItemActivity.class) && textEntered) {
+                    if (currentActivity.getClass().equals(NewItemActivity.class) && textEntered) {
                         new AlertDialog.Builder(currentActivity)
                                 .setMessage("Are you sure you want to exit? The data will not be saved once you exit.")
                                 .setPositiveButton("Yes", (dialog, which) -> {
@@ -70,7 +70,7 @@ public class NavigationRouter {
         return textEntered;
     }
 
-    private void navigate(Class<?> activityClass) {
+    public void navigate(Class<?> activityClass) {
         Intent intent = new Intent(currentActivity, activityClass);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         currentActivity.startActivity(intent);

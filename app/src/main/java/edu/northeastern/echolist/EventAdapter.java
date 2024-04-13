@@ -1,7 +1,8 @@
 package edu.northeastern.echolist;
 
+import static android.content.ContentValues.TAG;
+import android.util.Log;
 import android.content.Context;
-import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,9 +35,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(v.getContext(), AddItemActivity.class);
-                intent.putExtra("eventId", event.getEventId());
-                v.getContext().startActivity(intent);
+                Log.i(TAG, "edit");
             }
         });
     }
