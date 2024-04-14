@@ -38,9 +38,7 @@ public class NavigationRouter {
                     if (currentActivity.getClass().equals(NewItemActivity.class) && textEntered) {
                         new AlertDialog.Builder(currentActivity)
                                 .setMessage("Are you sure you want to exit? The data will not be saved once you exit.")
-                                .setPositiveButton("Yes", (dialog, which) -> {
-                                    navigate(HomeActivity.class);
-                                })
+                                .setPositiveButton("Yes", (dialog, which) -> navigate(HomeActivity.class))
                                 .setNegativeButton("No", null)
                                 .show();
                         return true;
@@ -58,9 +56,7 @@ public class NavigationRouter {
                     if (currentActivity.getClass().equals(NewItemActivity.class) && textEntered) {
                         new AlertDialog.Builder(currentActivity)
                                 .setMessage("Are you sure you want to exit? The data will not be saved once you exit.")
-                                .setPositiveButton("Yes", (dialog, which) -> {
-                                    navigate(MyListActivity.class);
-                                })
+                                .setPositiveButton("Yes", (dialog, which) -> navigate(MyListActivity.class))
                                 .setNegativeButton("No", null)
                                 .show();
                         return true;
