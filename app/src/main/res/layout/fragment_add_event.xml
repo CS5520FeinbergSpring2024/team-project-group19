@@ -65,13 +65,13 @@
                 android:id="@+id/dateLayout"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/locationLayout"
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
-                android:hint="@string/select_date">
+                android:hint="@string/select_date"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/locationLayout">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/eventDate"
@@ -99,7 +99,8 @@
                 android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginEnd="16dp"
-                android:hint="@string/select_date"
+                android:hint=""
+                android:background="@drawable/spinner_bg"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/friendsTitle">
@@ -109,16 +110,12 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:minHeight="48dp"
-                    app:boxCornerRadiusBottomEnd="4dp"
-                    app:boxCornerRadiusBottomStart="4dp"
-                    app:boxCornerRadiusTopEnd="4dp"
-                    app:boxCornerRadiusTopStart="4dp"
-                    app:boxStrokeColor="@color/black"
-                    app:boxStrokeWidth="1dp"/>
+                    />
             </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
                 android:id="@+id/categoryTitle"
+
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="10dp"
@@ -127,15 +124,26 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/friendsLayout"/>
 
-            <Spinner
-                android:id="@+id/categorySpinner"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/categoryLayout"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
-                android:minHeight="48dp"
+                android:layout_marginEnd="16dp"
+                android:hint=""
+                android:background="@drawable/spinner_bg"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/categoryTitle" />
+                app:layout_constraintTop_toBottomOf="@id/categoryTitle">
+
+                <Spinner
+                    android:id="@+id/categorySpinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="48dp"
+                    />
+            </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
                 android:id="@+id/visibilityTitle"
@@ -145,17 +153,28 @@
                 android:layout_marginTop="20dp"
                 android:text="@string/visibility"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/categorySpinner"/>
+                app:layout_constraintTop_toBottomOf="@id/categoryLayout"/>
 
-            <Spinner
-                android:id="@+id/visibilitySpinner"
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/visibilityLayout"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
                 android:layout_marginTop="16dp"
-                android:minHeight="48dp"
+                android:layout_marginEnd="16dp"
+                android:hint=""
+                android:background="@drawable/spinner_bg"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/visibilityTitle" />
+                app:layout_constraintTop_toBottomOf="@id/visibilityTitle">
+
+                <Spinner
+                    android:id="@+id/visibilitySpinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:minHeight="48dp"
+                    />
+            </com.google.android.material.textfield.TextInputLayout>
 
             <Button
                 android:id="@+id/saveEventButton"
@@ -163,8 +182,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/save_event"
                 android:layout_marginTop="24dp"
-                android:layout_marginBottom="2000dp"
-                app:layout_constraintTop_toBottomOf="@id/visibilitySpinner"
+                app:layout_constraintTop_toBottomOf="@id/visibilityLayout"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
 
