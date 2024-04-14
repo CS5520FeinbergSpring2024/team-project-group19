@@ -5,6 +5,7 @@ import static android.content.ContentValues.TAG;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -48,6 +49,7 @@ public class WishListActivity extends AppCompatActivity {
     private List<WishListItem> wishList = new ArrayList<>();
     private String eventId;
     private BottomNavigationView bottomNavigationView;
+    private Toolbar toolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,6 +57,7 @@ public class WishListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_wishlist_layout);
 
         eventId = getIntent().getStringExtra("eventId");
+        String eventTitle = getIntent().getStringExtra("eventTitle");
 
         fabAddWishListItem = findViewById(R.id.fabAddWishListItem);
         wishListRecyclerView = findViewById(R.id.wishlist_recyclerview);
@@ -63,30 +66,6 @@ public class WishListActivity extends AppCompatActivity {
         wishListAdapter = new WishListAdapter(this, wishList, eventId);
         wishListRecyclerView.setAdapter(wishListAdapter);
 
-        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
-//        bottomNavigationView.setSelectedItemId(R.id.page_view_posts);
-        NavigationRouter navigationRouter = new NavigationRouter(bottomNavigationView, this);
-        navigationRouter.initNavigation();
-
-        //        bottomNavigationView.setSelectedItemId(R.id.page_view_posts);
-        bottomNavigationView.setOnItemSelectedListener(item -> {
-            if (item.getItemId() == R.id.page_home) {
-                Intent intent = new Intent(WishListActivity.this, HomeActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                return true;
-            } else if (item.getItemId() == R.id.page_add_post) {
-                Intent intent = new Intent(WishListActivity.this, AddItemActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                return true;
-            } else if (item.getItemId() == R.id.page_view_posts) {
-                Intent intent = new Intent(WishListActivity.this, MyListActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-            }
-            return false;
-        });
 
         DatabaseReference databaseWishLists = FirebaseDatabase.getInstance().getReference("wishlists").child(eventId);
 
@@ -112,10 +91,10 @@ public class WishListActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.w(TAG, "loadPost:onCancelled", databaseError.toException());
                 Toast.makeText(WishListActivity.this, "Failed to load data.", Toast.LENGTH_SHORT).show();
             }
         });
+
         fabAddWishListItem.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -167,7 +146,6 @@ public class WishListActivity extends AppCompatActivity {
 
                         updateFirebaseWithNewOrder();
 
-
                         return true;
                     }
 
@@ -192,7 +170,6 @@ public class WishListActivity extends AppCompatActivity {
                                             }
                                         });
                                 snackbar.show();
-
                     }
 
                 });
@@ -200,6 +177,9 @@ public class WishListActivity extends AppCompatActivity {
 
     }
 
+    // Iterate over each wishlist item. Put the index of each wishlist item to a hashmap as the value
+    // to store the order of each item. Update the order field of each item with the order from the
+    // hashmap in Firebase
     private void updateFirebaseWithNewOrder() {
         DatabaseReference databaseWishLists = FirebaseDatabase.getInstance().getReference("wishlists").child(eventId);
         for (int i = 0; i < wishList.size(); i++) {
@@ -219,6 +199,7 @@ public class WishListActivity extends AppCompatActivity {
     }
 
 
+    // save the state of the wishlist
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -227,13 +208,11 @@ public class WishListActivity extends AppCompatActivity {
         ;       outState.putSerializable("wishlist_key", saveWishList);
     }
 
+    // restore the state of the wishlist
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         SaveWishList saveWishList = (SaveWishList) savedInstanceState.getSerializable("wishlist_key");
         wishListAdapter.setWishList(saveWishList.getWishList());
     }
-
-
-
 }

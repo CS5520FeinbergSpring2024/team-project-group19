@@ -65,24 +65,6 @@ public class EventDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_event_detail_layout);
 
-        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
-        bottomNavigationView.setOnItemSelectedListener(item -> {
-            if (item.getItemId() == R.id.page_home || item.getItemId() == R.id.page_add_post || item.getItemId() == R.id.page_view_posts) {
-                new AlertDialog.Builder(this)
-                        .setMessage("Are you sure you want to exit? The data will not be saved once you exit.")
-                        .setPositiveButton("Yes", (dialog, which) -> {
-                            dialog.dismiss();
-                            EventDetailActivity.super.onBackPressed();
-                        })
-                        .setNegativeButton("No", null)
-                        .show();
-                return true;
-            }
-            return false;
-        });
-        NavigationRouter navigationRouter = new NavigationRouter(bottomNavigationView, this);
-        navigationRouter.initNavigation();
-
         SharedPreferences sharedPreferences = getSharedPreferences("namePref", MODE_PRIVATE);
         String userId = sharedPreferences.getString("username", "User");
 
@@ -136,6 +118,7 @@ public class EventDetailActivity extends AppCompatActivity {
 
         eventLocation.setOnClickListener(v -> openAutocompleteActivity());
 
+        // Fetch event data based on eventId
         String eventId = getIntent().getStringExtra("eventId");
         if (eventId != null) {
             deleteEventButton.setVisibility(View.VISIBLE);
@@ -147,6 +130,7 @@ public class EventDetailActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     Intent intent = new Intent(EventDetailActivity.this, WishListActivity.class);
                     intent.putExtra("eventId", eventId);
+                    intent.putExtra("eventTitle", eventTitle.getText().toString());
                     startActivity(intent);
                 }
             });
@@ -177,6 +161,7 @@ public class EventDetailActivity extends AppCompatActivity {
                                                         public void onSuccess(Void unused) {
                                                             Intent intent = new Intent(EventDetailActivity.this, HomeActivity.class);
                                                             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                                            // pass data between EventDetailActivity and HomeActivity
                                                             intent.putExtra("eventDeleted", true);
                                                             intent.putExtra("deletedEventId", deletedEvent.getEventId());
                                                             intent.putExtra("deletedEventTitle", deletedEvent.getTitle());
@@ -217,6 +202,7 @@ public class EventDetailActivity extends AppCompatActivity {
         });
 
 
+        // initialize Google Places API
         if (!Places.isInitialized()) {
             Places.initialize(getApplicationContext(), "AIzaSyDAa1Wd5O8dpjeh1RdozE2_x221_tWiX00");
         }
@@ -268,8 +254,6 @@ public class EventDetailActivity extends AppCompatActivity {
                             String updatedDate = eventDate.getText().toString();
                             String updatedCategory = categorySpinner.getSelectedItem().toString();
                             String updatedVisibility = visibilitySpinner.getSelectedItem().toString();
-
-
 
                             if (updatedTitle.isEmpty() || updatedDate.isEmpty()) {
                                 new AlertDialog.Builder(EventDetailActivity.this)
@@ -327,7 +311,8 @@ public class EventDetailActivity extends AppCompatActivity {
 
     }
 
-
+    // launch Google Places Autocomplete to allow user to search and select a place from Google
+    // Places API
     private void openAutocompleteActivity() {
         List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS);
         Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fields)
@@ -335,6 +320,7 @@ public class EventDetailActivity extends AppCompatActivity {
         startActivityForResult(intent, 1);
     }
 
+    // Google Places Autocomplete react with user's selection or cancellation
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 

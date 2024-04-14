@@ -51,6 +51,8 @@ public class WishListAdapter extends RecyclerView.Adapter<WishListAdapter.ViewHo
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // trigger onWishListItemClick when user taps on an item of the wishlist recycler
+                // view. the onWishListItemClick is for editing the wishlist item
                 onWishListItemClick(wishListItem);
 //                Intent intent = new Intent(v.getContext(), WishListActivity.class);
 //                intent.putExtra("wishListId", wishListItem.getId());
@@ -163,6 +165,7 @@ public class WishListAdapter extends RecyclerView.Adapter<WishListAdapter.ViewHo
             this.editButton = itemView.findViewById(R.id.editbutton);
             purchaseCheckBox = itemView.findViewById(R.id.purchaseCheckbox);
 
+            // checkbox for user to select
             purchaseCheckBox.setOnCheckedChangeListener(((buttonView, isChecked) -> {
                 int position = getAdapterPosition();
                 if (position != RecyclerView.NO_POSITION) {
@@ -173,6 +176,7 @@ public class WishListAdapter extends RecyclerView.Adapter<WishListAdapter.ViewHo
                 }
                 })
             );
+
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -183,6 +187,8 @@ public class WishListAdapter extends RecyclerView.Adapter<WishListAdapter.ViewHo
                 }
             });
 
+            // press the edit button will trigger editWishListItem which allows user to edit the
+            // wishlist item
             editButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

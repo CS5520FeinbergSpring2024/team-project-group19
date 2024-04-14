@@ -31,6 +31,8 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
         holder.titleTextView.setText(event.getTitle());
         holder.dateTextView.setText(event.getDate());
 
+        // when user taps on an item of the event recycler view, the click listener start the
+        // EventDetailActivity for the clicked event
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -57,10 +59,10 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
     }
 
 
+    // display the recycler view
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView titleTextView;
         public TextView dateTextView;
-        private EventAdapter eventAdapter;
 
         public ViewHolder(View itemView, EventAdapter eventAdapter) {
             super(itemView);
