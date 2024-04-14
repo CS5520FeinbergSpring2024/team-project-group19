@@ -2,6 +2,7 @@ package edu.northeastern.echolist;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.view.Menu;
 
 import androidx.appcompat.app.AlertDialog;
 
@@ -16,11 +17,21 @@ public class NavigationRouter {
     public NavigationRouter(BottomNavigationView bottomNavigationView, Activity currentActivity) {
         this.bottomNavigationView = bottomNavigationView;
         this.currentActivity = currentActivity;
-
-        this.bottomNavigationView.setItemHorizontalTranslationEnabled(false);
     }
 
     public void initNavigation() {
+        // disable animation
+        bottomNavigationView.setItemHorizontalTranslationEnabled(false);
+        // set active
+        Menu menu = bottomNavigationView.getMenu();
+        if (currentActivity.getClass().equals(HomeActivity.class)) {
+            menu.findItem(R.id.page_home).setChecked(true);
+        } else if (currentActivity.getClass().equals(NewItemActivity.class)) {
+            menu.findItem(R.id.page_add_post).setChecked(true);
+        } else {
+            menu.findItem(R.id.page_view_posts).setChecked(true);
+        }
+        // setup listener
         bottomNavigationView.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.page_home) {
                 if (!currentActivity.getClass().equals(HomeActivity.class)) {
