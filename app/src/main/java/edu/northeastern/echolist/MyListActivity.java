@@ -102,8 +102,6 @@ public class MyListActivity extends AppCompatActivity {
             }
         });
 
-
-
         bottomNavigationView.setSelectedItemId(R.id.page_view_posts);
         bottomNavigationView.setOnItemSelectedListener(item -> {
             if (item.getItemId() == R.id.page_home) {

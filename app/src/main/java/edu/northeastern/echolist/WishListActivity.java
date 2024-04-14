@@ -59,6 +59,12 @@ public class WishListActivity extends AppCompatActivity {
         eventId = getIntent().getStringExtra("eventId");
         String eventTitle = getIntent().getStringExtra("eventTitle");
 
+        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbarwishlist);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(eventTitle + " Wish List");
+        }
+
         fabAddWishListItem = findViewById(R.id.fabAddWishListItem);
         wishListRecyclerView = findViewById(R.id.wishlist_recyclerview);
 

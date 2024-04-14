@@ -38,6 +38,7 @@ public class MyListAdapter extends RecyclerView.Adapter<MyListAdapter.ViewHolder
             public void onClick(View v) {
                 Intent intent = new Intent(v.getContext(), WishListActivity.class);
                 intent.putExtra("eventId", event.getEventId());
+                intent.putExtra("eventTitle", event.getTitle());
                 v.getContext().startActivity(intent);
             }
         });
@@ -78,6 +79,7 @@ public class MyListAdapter extends RecyclerView.Adapter<MyListAdapter.ViewHolder
                         Event event = listAdapter.eventsList.get(position);
                         Intent intent = new Intent(v.getContext(), EventDetailActivity.class);
                         intent.putExtra("eventId", event.getEventId());
+                        intent.putExtra("sourceActivity", "MyListActivity");
                         v.getContext().startActivity(intent);
                     }
                 }

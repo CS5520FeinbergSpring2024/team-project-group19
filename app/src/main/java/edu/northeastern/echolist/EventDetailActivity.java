@@ -195,9 +195,21 @@ public class EventDetailActivity extends AppCompatActivity {
         cancelButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(EventDetailActivity.this, HomeActivity.class);
+                // initialize activityClass as HomeActivity.class
+                Class<?> activityClass = HomeActivity.class;
+
+                // Check where the activity was started from
+                String sourceActivity = getIntent().getStringExtra("sourceActivity");
+                if (sourceActivity != null) {
+                    if (sourceActivity.equals("MyListActivity")) {
+                        activityClass = MyListActivity.class;
+                    }
+                }
+                // Start the parent activity
+                Intent intent = new Intent(EventDetailActivity.this, activityClass);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);
+                finish();
             }
         });
 
@@ -304,11 +316,21 @@ public class EventDetailActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
             super.onBackPressed();
-            Intent intent = new Intent(EventDetailActivity.this, HomeActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-            return;
+        // initialize activityClass as HomeActivity.class
+        Class<?> activityClass = HomeActivity.class;
 
+        // Check where the activity was started from
+        String sourceActivity = getIntent().getStringExtra("sourceActivity");
+        if (sourceActivity != null) {
+            if (sourceActivity.equals("MyListActivity")) {
+                activityClass = MyListActivity.class;
+            }
+        }
+        // Start the parent activity
+        Intent intent = new Intent(EventDetailActivity.this, activityClass);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 
     // launch Google Places Autocomplete to allow user to search and select a place from Google
