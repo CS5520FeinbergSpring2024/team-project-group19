@@ -2,63 +2,117 @@ package edu.northeastern.echolist;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.Spinner;
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link AddWishlistItem#newInstance} factory method to
- * create an instance of this fragment.
  */
 public class AddWishlistItem extends Fragment {
+    private TextWatcher textWatcher;
+    private NavigationRouter navigationRouter;
+    private DatabaseReference events;
+    private String userId;
+    private EditText giftTitle;
+    private EditText descriptionTitle;
+    private Spinner eventSpinner;
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    public AddWishlistItem() {
-        // Required empty public constructor
-    }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment AddWishlistItem.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static AddWishlistItem newInstance(String param1, String param2) {
-        AddWishlistItem fragment = new AddWishlistItem();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
+    public AddWishlistItem(NavigationRouter navigationRouter, DatabaseReference events, String userId) {
+        this.navigationRouter = navigationRouter;
+        this.events = events;
+        this.userId = userId;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_add_wishlist_item, container, false);
+        View view = inflater.inflate(R.layout.fragment_add_wishlist_item, container, false);
+
+        // watch for text input
+        initTextWatcher();
+
+        // Init input fields
+        // title
+        giftTitle = view.findViewById(R.id.giftTitle);
+        giftTitle.addTextChangedListener(textWatcher);
+
+        // description
+        descriptionTitle = view.findViewById(R.id.descriptionTitle);
+        descriptionTitle.addTextChangedListener(textWatcher);
+
+        // event selection
+        eventSpinner = view.findViewById(R.id.eventSpinner);
+        // get the user's events
+        Query query = events
+                .orderByChild("userId")
+                .equalTo(userId);
+        query.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                List<String> eventTitles = new ArrayList<>();
+
+                for (DataSnapshot eventSnapshot : dataSnapshot.getChildren()) {
+                    Event event = eventSnapshot.getValue(Event.class);
+                    if (event != null) {
+                        eventTitles.add(event.getTitle());
+                    }
+                }
+                ArrayAdapter<String> eventAdapter = new ArrayAdapter<String>(
+                        requireContext(),
+                        android.R.layout.simple_spinner_item,
+                        eventTitles
+                );
+                eventAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                eventSpinner.setAdapter(eventAdapter);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        return view;
+    }
+
+    private void initTextWatcher() {
+        textWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // Update the flag based on whether any text is entered
+                navigationRouter.setTextEntered(!TextUtils.isEmpty(s));
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        };
     }
 }

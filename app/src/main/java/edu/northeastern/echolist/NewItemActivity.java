@@ -42,7 +42,7 @@ public class NewItemActivity extends AppCompatActivity {
 
         ViewPagerHelper viewpager = new ViewPagerHelper(getSupportFragmentManager());
         viewpager.addFragment(new AddEvent(navigationRouter, events, userId), "New Event");
-        viewpager.addFragment(new AddWishlistItem(), "New Item");
+        viewpager.addFragment(new AddWishlistItem(navigationRouter, events, userId), "New Gift");
         viewPager.setAdapter(viewpager);
     }
 
