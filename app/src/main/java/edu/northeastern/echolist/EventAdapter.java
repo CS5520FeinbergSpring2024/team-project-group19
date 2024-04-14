@@ -34,7 +34,7 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(v.getContext(), AddItemActivity.class);
+                Intent intent = new Intent(v.getContext(), EventDetailActivity.class);
                 intent.putExtra("eventId", event.getEventId());
                 v.getContext().startActivity(intent);
             }

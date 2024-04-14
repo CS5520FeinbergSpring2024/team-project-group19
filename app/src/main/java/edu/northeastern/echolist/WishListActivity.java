@@ -68,6 +68,26 @@ public class WishListActivity extends AppCompatActivity {
         NavigationRouter navigationRouter = new NavigationRouter(bottomNavigationView, this);
         navigationRouter.initNavigation();
 
+        //        bottomNavigationView.setSelectedItemId(R.id.page_view_posts);
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            if (item.getItemId() == R.id.page_home) {
+                Intent intent = new Intent(WishListActivity.this, HomeActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                return true;
+            } else if (item.getItemId() == R.id.page_add_post) {
+                Intent intent = new Intent(WishListActivity.this, AddItemActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                return true;
+            } else if (item.getItemId() == R.id.page_view_posts) {
+                Intent intent = new Intent(WishListActivity.this, MyListActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+            }
+            return false;
+        });
+
         DatabaseReference databaseWishLists = FirebaseDatabase.getInstance().getReference("wishlists").child(eventId);
 
         databaseWishLists.addValueEventListener(new ValueEventListener() {
@@ -178,26 +198,6 @@ public class WishListActivity extends AppCompatActivity {
                 });
         itemTouchHelper.attachToRecyclerView(wishListRecyclerView);
 
-
-//        bottomNavigationView.setSelectedItemId(R.id.page_view_posts);
-                bottomNavigationView.setOnItemSelectedListener(item -> {
-                    if (item.getItemId() == R.id.page_home) {
-                        Intent intent = new Intent(WishListActivity.this, HomeActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
-                        return true;
-                    } else if (item.getItemId() == R.id.page_add_post) {
-                        Intent intent = new Intent(WishListActivity.this, AddItemActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
-                        return true;
-                    } else if (item.getItemId() == R.id.page_view_posts) {
-                        Intent intent = new Intent(WishListActivity.this, MyListActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
-                    }
-                    return false;
-                });
     }
 
     private void updateFirebaseWithNewOrder() {

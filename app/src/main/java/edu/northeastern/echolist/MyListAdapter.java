@@ -76,7 +76,7 @@ public class MyListAdapter extends RecyclerView.Adapter<MyListAdapter.ViewHolder
                     int position = getAdapterPosition();
                     if (position != RecyclerView.NO_POSITION) {
                         Event event = listAdapter.eventsList.get(position);
-                        Intent intent = new Intent(v.getContext(), AddItemActivity.class);
+                        Intent intent = new Intent(v.getContext(), EventDetailActivity.class);
                         intent.putExtra("eventId", event.getEventId());
                         v.getContext().startActivity(intent);
                     }
