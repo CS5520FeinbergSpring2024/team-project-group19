@@ -14,94 +14,141 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
 
 public class GiftViewModel extends ViewModel {
 
-    private final DatabaseReference dbRef;
-    private MutableLiveData<String> userKeyLiveData;
+    private final DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
+    private final DatabaseReference userRef = dbRef.child("users");
+    private final DatabaseReference giftsRef = dbRef.child("gifts");
+    private MutableLiveData<List<String>> favoriteGiftIdsLiveData = new MutableLiveData<>();
 
-    public GiftViewModel() {
-        dbRef = FirebaseDatabase.getInstance().getReference("users");
-        userKeyLiveData = new MutableLiveData<>();
+    public GiftViewModel() {};
+
+    public void getUserKey(String userId, OnUserKeyFetchedListener listener) {
+        userRef.orderByChild("userId").equalTo(userId)
+                .addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                            for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                                String userKey = snapshot.getKey();
+                                Log.d("GiftViewModel", "User key received: " + userKey);
+                                listener.onUserKeyFetched(userKey);
+                                return;
+                            }
+                        } else {
+                            Log.e("GiftViewModel", "No user found for userId: " + userId);
+                            listener.onUserKeyFetched(null);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        Log.e("GiftViewModel", "Database error fetching user key: " + databaseError.getMessage());
+                        listener.onUserKeyFetched(null);
+                    }
+            });
     }
 
-    public LiveData<String> getUserKey(String userId) {
-        Log.d("FirebaseData", "Checking for userId " + userId);
-        dbRef.orderByChild("userId").equalTo(userId)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
+    public LiveData<List<String>> getFavoriteGiftIds() {
+        return favoriteGiftIdsLiveData;
+    }
+
+    public void fetchTrendingGifts(int maxGifts, DataLoadCallback<Gift> callback) {
+        giftsRef.orderByChild("isTrending").equalTo(1).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (!dataSnapshot.exists()) {
-                    Log.d("FirebaseData1", "No data found for the query.");
-                    return;
-                }
-                Log.d("FirebaseData2", "DataSnapshot: " + dataSnapshot.getValue());
+                List<Gift> gifts = new ArrayList<>();
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    Log.d("FirebaseData3", "User Key: " + snapshot.getKey());
-                    userKeyLiveData.setValue(snapshot.getKey());
-                    break;
+                    Gift gift = snapshot.getValue(Gift.class);
+                    if (gift != null) {
+                        gifts.add(gift);
+                    }
+                }
+                if (!gifts.isEmpty()) {
+                    List<Gift> selectedGifts = selectRandomGifts(gifts, maxGifts);
+                    callback.onDataLoaded(selectedGifts);
+                } else {
+                    callback.onDataNotAvailable("No trending gifts found.");
                 }
             }
 
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                // log error or handle cancellation
-                userKeyLiveData.setValue(null);
-            }
-        });
-        return userKeyLiveData;
-    }
-
-
-    public LiveData<List<String>> fetchUserFavoritedGiftIds(String userId) {
-        MutableLiveData<List<String>> favoritedGiftIdsLiveData = new MutableLiveData<>();
-        getUserKey(userId).observeForever(userKey -> {
-            dbRef.child(userKey).child("favoritedGifts")
-                    .addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            List<String> favoritedGiftIds = new ArrayList<>();
-                            for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                                String giftId = snapshot.getKey(); // assuming the key is the gift ID
-                                favoritedGiftIds.add(giftId);
-                            }
-                            favoritedGiftIdsLiveData.setValue(favoritedGiftIds);
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-                            // handle the error, for now setting LiveData to null
-                            favoritedGiftIdsLiveData.setValue(null);
-                        }
-                    });
-        });
-        return favoritedGiftIdsLiveData;
-    }
-
-    public void addGiftToUserFavorites(String userId, String giftId) {
-        getUserKey(userId).observeForever(userKey -> {
-            if (userKey == null || giftId == null || giftId.isEmpty()) {
-                Log.e("GiftViewModel-AddToFavorites", "Can't add, userKey (" + userKey + ") or giftId (" + giftId + ") is null or empty.");
-            } else {
-                // remove placeholder
-                dbRef.child(userKey).child("favoritedGifts").child("placeholder").removeValue();
-                // add real gift
-                dbRef.child(userKey).child("favoritedGifts").child(giftId).setValue(true)
-                        .addOnSuccessListener(aVoid -> Log.d("GiftViewModel-AddToFavorites", "giftId (" + giftId + ") added to " + userId + " favorites"))
-                        .addOnFailureListener(e -> Log.e("GiftViewModel-AddToFavorites", "Failed to add gift to favorites", e));
+            public void onCancelled(@NonNull DatabaseError error) {
+                callback.onDataNotAvailable(error.getMessage());
             }
         });
     }
 
-    public void removeGiftFromUserFavorites(String userId, String giftId) {
-        getUserKey(userId).observeForever(userKey -> {
+    public void fetchUserFavorites(String userId) {
+        getUserKey(userId, userKey -> {
             if (userKey != null) {
-                dbRef.child(userKey).child("favoritedGifts").child(giftId).removeValue();
+                DatabaseReference userFavoritesRef = dbRef.child("users").child(userKey).child("favoritedGifts");
+                userFavoritesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        List<String> favoriteGiftIds = new ArrayList<>();
+                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                            String giftId = snapshot.getKey();
+                            favoriteGiftIds.add(giftId);
+                        }
+                        favoriteGiftIdsLiveData.setValue(favoriteGiftIds);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        Log.e("fetchUserFavorites", databaseError.getMessage());
+                    }
+                });
             } else {
-                Log.e("GiftViewModel-RemoveFromFavorites", "Can't remove giftId " + giftId);
+                Log.e("fetchUserFavorites", "User key not found.");
             }
         });
+    }
+
+    private List<Gift> selectRandomGifts(List<Gift> gifts, int max) {
+        Collections.shuffle(gifts);
+        return gifts.subList(0, Math.min(max, gifts.size()));
+    }
+
+    public void addGiftToUserFavorites(String userId, String giftId, OperationCallback callback) {
+        getUserKey(userId, userKey -> {
+            if (userKey != null) {
+                dbRef.child("users").child(userKey).child("favoritedGifts").child(giftId).setValue(true)
+                        .addOnSuccessListener(aVoid -> callback.onSuccess())
+                        .addOnFailureListener(e -> callback.onError(e.getMessage()));
+            } else {
+                callback.onError("User key not found.");
+            }
+        });
+    }
+
+    public void removeGiftFromUserFavorites(String userId, String giftId, OperationCallback callback) {
+        getUserKey(userId, userKey -> {
+            if (userKey != null) {
+                dbRef.child("users").child(userKey).child("favoritedGifts").child(giftId).removeValue()
+                        .addOnSuccessListener(aVoid -> callback.onSuccess())
+                        .addOnFailureListener(e -> callback.onError(e.getMessage()));
+            } else {
+                callback.onError("User key not found.");
+            }
+        });
+    }
+
+    public interface OnUserKeyFetchedListener {
+        void onUserKeyFetched(String userKey);
+    }
+
+    public interface DataLoadCallback<T> {
+        void onDataLoaded(List<T> data);
+        void onDataNotAvailable(String error);
+    }
+
+    public interface OperationCallback {
+        void onSuccess();
+        void onError(String error);
     }
 }
-
