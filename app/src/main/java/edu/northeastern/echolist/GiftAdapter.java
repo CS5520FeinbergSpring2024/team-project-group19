@@ -17,16 +17,16 @@ import java.util.List;
 
 public class GiftAdapter extends RecyclerView.Adapter<GiftAdapter.GiftViewHolder> {
 
-    private List<Gift> giftList;
-    private List<String> favoritedGiftIds;
+    private final List<Gift> giftList;
+    private final List<String> favoriteGiftIds;
     private final OnGiftFavoriteListener favoriteListener;
     private final OnGiftClickListener cardListener;
 
 
-    public GiftAdapter(List<Gift> giftList, List<String> favoritedGiftIds, OnGiftFavoriteListener favoriteListener, OnGiftClickListener cardListener) {
+    public GiftAdapter(List<Gift> giftList, List<String> favoriteGiftIds, OnGiftFavoriteListener favoriteListener, OnGiftClickListener cardListener) {
         this.giftList = giftList;
-        this.favoritedGiftIds = favoritedGiftIds;
-        Log.d("GiftAdapter", "Favorite IDs set: " + favoritedGiftIds);
+        this.favoriteGiftIds = favoriteGiftIds;
+        Log.d("GiftAdapter", "Favorite IDs set: " + favoriteGiftIds);
         this.favoriteListener = favoriteListener;
         this.cardListener = cardListener;
     }
@@ -45,7 +45,7 @@ public class GiftAdapter extends RecyclerView.Adapter<GiftAdapter.GiftViewHolder
             Log.e("GiftAdapter", "Gift at position " + position + " has a null giftId");
         }
 
-        boolean isFavorite = favoritedGiftIds.contains(gift.getGiftId());
+        boolean isFavorite = favoriteGiftIds.contains(gift.getGiftId());
         Log.d("GiftAdapter", "Gift ID: " + gift.getGiftId() + ", isFavorite: " + isFavorite);
 
         holder.giftNameTextView.setText(gift.getName());
@@ -62,18 +62,15 @@ public class GiftAdapter extends RecyclerView.Adapter<GiftAdapter.GiftViewHolder
         });
         holder.favoriteCheckBox.setVisibility(View.VISIBLE);
 
-        holder.itemView.post(new Runnable() {
-            @Override
-            public void run() {
-                holder.favoriteCheckBox.setOnCheckedChangeListener(null);
-                holder.favoriteCheckBox.setChecked(isFavorite);
-                holder.favoriteCheckBox.setVisibility(View.VISIBLE);
-                holder.favoriteCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                    if (favoriteListener != null) {
-                        favoriteListener.onGiftFavoriteChanged(gift, isChecked);
-                    }
-                });
-            }
+        holder.itemView.post(() -> {
+            holder.favoriteCheckBox.setOnCheckedChangeListener(null);
+            holder.favoriteCheckBox.setChecked(isFavorite);
+            holder.favoriteCheckBox.setVisibility(View.VISIBLE);
+            holder.favoriteCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (favoriteListener != null) {
+                    favoriteListener.onGiftFavoriteChanged(gift, isChecked);
+                }
+            });
         });
     }
 
