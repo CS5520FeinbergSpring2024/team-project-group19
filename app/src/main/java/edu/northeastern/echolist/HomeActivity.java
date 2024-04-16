@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -11,6 +12,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -45,7 +47,12 @@ public class HomeActivity extends AppCompatActivity {
     private List<Event> upcomingEventsList = new ArrayList<>(); //Only events to be shown
     private EventAdapter upcomingEventAdapter;
     private GiftAdapter giftAdapter;
-    private List<Gift> trendingGifts = new ArrayList<>();
+    private GiftViewModel giftViewModel;
+    private RecyclerView trendingGiftsRecyclerView;
+    private List<Gift> gifts = new ArrayList<>();
+    private List<String> favoriteGiftIds = new ArrayList<>();
+    private boolean giftsLoaded = false;
+    private boolean favoritesLoaded = false;
     protected TextView userIdTextView;
     private Event deletedEvent;
 
@@ -59,7 +66,6 @@ public class HomeActivity extends AppCompatActivity {
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         NavigationRouter navigationRouter = new NavigationRouter(bottomNavigationView, this);
         navigationRouter.initNavigation();
-
 
         // Retrieve the user ID from sharedPreference
         SharedPreferences sharedPreferences = getSharedPreferences("namePref", MODE_PRIVATE);
@@ -155,24 +161,21 @@ public class HomeActivity extends AppCompatActivity {
             public void onCancelled(@NonNull DatabaseError error) {
             }
         });
-
-
-        RecyclerView trendingGiftsRecyclerView = findViewById(R.id.trending_gift_recyclerview);
-        RecyclerView.LayoutManager giftLayoutManager = new LinearLayoutManager(this,
-                LinearLayoutManager.HORIZONTAL, false);
-        trendingGiftsRecyclerView.setLayoutManager(giftLayoutManager);
-        giftAdapter = new GiftAdapter(new ArrayList<>(), new GiftAdapter.OnGiftClickListener() {
-            @Override
-            public void onGiftClick(Gift gift) {
-                // handle gift click event
-                GiftDialog dialog = GiftDialog.newInstance(gift.getDescription());
-                dialog.show(getSupportFragmentManager(), "GiftDialog");
+        giftViewModel = new ViewModelProvider(this).get(GiftViewModel.class);
+        trendingGiftsRecyclerView = findViewById(R.id.trending_gift_recyclerview);
+        setupGiftRecyclerView();
+        fetchTrendingGifts();
+        if (giftViewModel.getFavoriteGiftIds().getValue() == null) {
+            giftViewModel.fetchUserFavorites(getUserId());
+        }
+        giftViewModel.getFavoriteGiftIds().observe(this, favoriteGiftIds -> {
+            if (favoriteGiftIds != null) {
+                this.favoriteGiftIds = favoriteGiftIds;
+                Log.d("Home-getFavoriteGiftIds", "Favorite IDs loaded: " + favoriteGiftIds);
+                favoritesLoaded = true;
+                initializeGiftAdapter();
             }
         });
-        trendingGiftsRecyclerView.setAdapter(giftAdapter);
-
-        // fetch trending gifts from Firebase
-        fetchTrendingGifts();
     }
 
     @Override
@@ -217,6 +220,16 @@ public class HomeActivity extends AppCompatActivity {
         super.onResume();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+
+    private String getUserId() {
+        SharedPreferences sharedPreferences = getSharedPreferences("namePref", MODE_PRIVATE);
+        return sharedPreferences.getString("username", "User");
+    }
+
     // Logout confirmation Dialog from Home page.
     @Override
     public void onBackPressed() {
@@ -240,35 +253,70 @@ public class HomeActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void fetchTrendingGifts() {
-        DatabaseReference giftsRef = FirebaseDatabase.getInstance().getReference("gifts");
-        giftsRef.orderByChild("isTrending").equalTo(1)
-                .addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        trendingGifts.clear();
-                        for (DataSnapshot giftSnapshot : dataSnapshot.getChildren()) {
-                            Gift gift = giftSnapshot.getValue(Gift.class);
-                            if (gift != null) {
-                                trendingGifts.add(gift);
-                            }
-                        }
-                        // randomly select gifts from the trendingGifts list
-                        List<Gift> selectedGifts = getRandomGifts(trendingGifts, 5); // select 5 random gifts
-                        // update the UI with the selected gifts
-                        giftAdapter.setGifts(selectedGifts);
-                    }
+    private void setupGiftRecyclerView() {
+        RecyclerView.LayoutManager giftLayoutManager = new LinearLayoutManager(this,
+                LinearLayoutManager.HORIZONTAL, false);
+        trendingGiftsRecyclerView.setLayoutManager(giftLayoutManager);
 
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                        // todo: error handling
-                    }
-                });
     }
-    private List<Gift> getRandomGifts(List<Gift> gifts, int count) {
-        List<Gift> randomGifts = new ArrayList<>(gifts);
-        Collections.shuffle(randomGifts);
-        return randomGifts.subList(0, Math.min(count, randomGifts.size()));
+
+    private void initializeGiftAdapter() {
+        if (giftsLoaded && favoritesLoaded && giftAdapter == null) {
+            giftAdapter = new GiftAdapter(gifts, favoriteGiftIds, (gift, isFavorite) -> {
+                if (isFavorite) {
+                    giftViewModel.addGiftToUserFavorites(getUserId(), gift.getGiftId(), new GiftViewModel.OperationCallback() {
+                        @Override
+                        public void onSuccess() {
+                            // Toast.makeText(HomeActivity.this, "Added to favorites", Toast.LENGTH_SHORT).show();
+                            favoriteGiftIds.add(gift.getGiftId());
+                            giftAdapter.notifyDataSetChanged();
+                        }
+
+                        @Override
+                        public void onError(String error) {
+                            Toast.makeText(HomeActivity.this, "Error adding to favorites: " + error, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else {
+                    giftViewModel.removeGiftFromUserFavorites(getUserId(), gift.getGiftId(), new GiftViewModel.OperationCallback() {
+                        @Override
+                        public void onSuccess() {
+                            // Toast.makeText(HomeActivity.this, "Removed from favorites", Toast.LENGTH_SHORT).show();
+                            favoriteGiftIds.remove(gift.getGiftId());
+                            giftAdapter.notifyDataSetChanged();
+                        }
+
+                        @Override
+                        public void onError(String error) {
+                            Toast.makeText(HomeActivity.this, "Error removing from favorites: " + error, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            }, gift -> {
+                GiftDialog dialog = GiftDialog.newInstance(gift.getDescription());
+                dialog.show(getSupportFragmentManager(), "GiftDialog");
+            });
+            trendingGiftsRecyclerView.setAdapter(giftAdapter);
+        }
+    }
+
+    private void fetchTrendingGifts() {
+        giftViewModel.fetchTrendingGifts(5, new GiftViewModel.DataLoadCallback<Gift>() {
+            @Override
+            public void onDataLoaded(List<Gift> loadedGifts) {
+                gifts = loadedGifts;
+                Log.d("Home-FetchTrendingGifts", "Trending gifts loaded: " + gifts);
+                Log.d("Home-FetchTrendingGifts", "Trending gifts loaded flag: " + giftsLoaded);
+                giftsLoaded = true;
+                Log.d("Home-FetchTrendingGifts", "Trending gifts loaded flag: " + giftsLoaded);
+                initializeGiftAdapter();
+            }
+
+            @Override
+            public void onDataNotAvailable(String error) {
+                Toast.makeText(HomeActivity.this, "Failed to load gifts: " + error, Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     private void handleUpcomingEventChildAdded(DataSnapshot snapshot) {
@@ -321,5 +369,4 @@ public class HomeActivity extends AppCompatActivity {
             }
         }
     };
-
 }
