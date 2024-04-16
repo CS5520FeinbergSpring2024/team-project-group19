@@ -23,9 +23,9 @@ public class GiftViewModel extends ViewModel {
     private final DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
     private final DatabaseReference userRef = dbRef.child("users");
     private final DatabaseReference giftsRef = dbRef.child("gifts");
-    private MutableLiveData<List<String>> favoriteGiftIdsLiveData = new MutableLiveData<>();
+    private final MutableLiveData<List<String>> favoriteGiftIdsLiveData = new MutableLiveData<>();
 
-    public GiftViewModel() {};
+    public GiftViewModel() {}
 
     public void getUserKey(String userId, OnUserKeyFetchedListener listener) {
         userRef.orderByChild("userId").equalTo(userId)
