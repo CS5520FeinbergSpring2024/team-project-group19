@@ -26,18 +26,9 @@ public class GiftAdapter extends RecyclerView.Adapter<GiftAdapter.GiftViewHolder
     public GiftAdapter(List<Gift> giftList, List<String> favoritedGiftIds, OnGiftFavoriteListener favoriteListener, OnGiftClickListener cardListener) {
         this.giftList = giftList;
         this.favoritedGiftIds = favoritedGiftIds;
+        Log.d("GiftAdapter", "Favorite IDs set: " + favoritedGiftIds);
         this.favoriteListener = favoriteListener;
         this.cardListener = cardListener;
-    }
-
-    public void setGifts(List<Gift> gifts) {
-        this.giftList = gifts;
-        notifyDataSetChanged();
-    }
-
-    public void setFavoritedGiftIds(List<String> favoritedGiftIds) {
-        this.favoritedGiftIds = favoritedGiftIds;
-        notifyDataSetChanged(); // notify the adapter to re-bind all view holders
     }
 
     @NonNull
@@ -53,8 +44,43 @@ public class GiftAdapter extends RecyclerView.Adapter<GiftAdapter.GiftViewHolder
         if (gift.getGiftId() == null) {
             Log.e("GiftAdapter", "Gift at position " + position + " has a null giftId");
         }
+
         boolean isFavorite = favoritedGiftIds.contains(gift.getGiftId());
-        holder.bind(gift, isFavorite);
+        Log.d("GiftAdapter", "Gift ID: " + gift.getGiftId() + ", isFavorite: " + isFavorite);
+
+        holder.giftNameTextView.setText(gift.getName());
+
+        // using Glide image loading library
+        Glide.with(holder.itemView.getContext()).load(gift.getImage()).into(holder.giftImageView);
+
+        holder.favoriteCheckBox.setOnCheckedChangeListener(null);
+        holder.favoriteCheckBox.setChecked(isFavorite);
+        holder.favoriteCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (favoriteListener != null) {
+                favoriteListener.onGiftFavoriteChanged(gift, isChecked);
+            }
+        });
+        holder.favoriteCheckBox.setVisibility(View.VISIBLE);
+
+        holder.itemView.post(new Runnable() {
+            @Override
+            public void run() {
+                holder.favoriteCheckBox.setOnCheckedChangeListener(null);
+                holder.favoriteCheckBox.setChecked(isFavorite);
+                holder.favoriteCheckBox.setVisibility(View.VISIBLE);
+                holder.favoriteCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                    if (favoriteListener != null) {
+                        favoriteListener.onGiftFavoriteChanged(gift, isChecked);
+                    }
+                });
+            }
+        });
+    }
+
+    @Override
+    public void onViewRecycled(@NonNull GiftViewHolder holder) {
+        super.onViewRecycled(holder);
+        holder.favoriteCheckBox.setOnCheckedChangeListener(null);
     }
 
     @Override
@@ -79,24 +105,6 @@ public class GiftAdapter extends RecyclerView.Adapter<GiftAdapter.GiftViewHolder
                     cardListener.onGiftClick(giftList.get(position));
                 }
             });
-
-            favoriteCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                int position = getAdapterPosition();
-                if (position != RecyclerView.NO_POSITION) {
-                    Gift gift = giftList.get(position);
-                    if (favoriteListener != null) {
-                        favoriteListener.onGiftFavoriteChanged(gift, isChecked);
-                    }
-                }
-            });
-        }
-
-        public void bind(Gift gift, boolean isFavorite) {
-            // using Glide image loading library
-            Glide.with(itemView.getContext()).load(gift.getImage()).into(giftImageView);
-
-            giftNameTextView.setText(gift.getName());
-            favoriteCheckBox.setChecked(isFavorite);
         }
     }
 
