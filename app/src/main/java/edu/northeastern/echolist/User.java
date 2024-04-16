@@ -1,5 +1,6 @@
 package edu.northeastern.echolist;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class User {
@@ -7,10 +8,8 @@ public class User {
     private String password;
     private String profileImageUrl;
     private String profileImageData; // Add this field for base64-encoded image data
+    private List<String> friends; // List of friends
     private List<String> favorites;
-
-
-
 
     public User() {
 
@@ -61,12 +60,28 @@ public class User {
         this.profileImageData = profileImageData;
     }
 
+    // Methods for adding and delete friends.
+    public void addFriend(String friendUserId) {
+        if (friends == null) {
+            friends = new ArrayList<>();
+        }
+        if (!friends.contains(friendUserId)) {
+            friends.add(friendUserId);
+        }
+    }
+
+    public List<String> getFriends() {
+        return friends;
+    }
     public List<String> getFavorites() { return favorites; }
 
     public void setFavorites(List<String> favorites) {
         this.favorites = favorites;
     }
 
-
-
+    public void removeFriend(String friendUserId) {
+        if (friends != null) {
+            friends.remove(friendUserId);
+        }
+    }
 }

@@ -18,6 +18,9 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Base64;
 import android.util.Log;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -31,15 +34,18 @@ import com.google.firebase.database.ValueEventListener;
 
 
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProfileActivity extends AppCompatActivity {
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int REQUEST_IMAGE_PICK = 2;
     private static final int REQUEST_CAMERA_PERMISSION = 3;
-
     private TextView userIdTextView;
     private ImageView profileImageView;
     private String userId;
+    private Button addFriendButton;
+    private String friendUserId; // String that contains the selected friendID
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +53,7 @@ public class ProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_profile);
         userIdTextView = findViewById(R.id.userId_textview);
         profileImageView = findViewById(R.id.profile_image);
-
+        addFriendButton = findViewById(R.id.add_friend_button);
 
         SharedPreferences sharedPreferences = getSharedPreferences("namePref", MODE_PRIVATE);
         userId = sharedPreferences.getString("username", "User not found");
@@ -63,9 +69,99 @@ public class ProfileActivity extends AppCompatActivity {
         profileImageView.setOnClickListener(view -> {
             showImageSelectionOptions();
         });
+
+
+        addFriendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                addFriendAction(view);
+            }
+        });
     }
 
 
+    public void addFriendAction(View view){
+            showUserSelectionDialog(); //Popping up dialog to pick from
+    }
+
+    private void showUserSelectionDialog() {
+        DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
+        usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                List<String> userIds = new ArrayList<>();
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    String currentUserId = snapshot.child("userId").getValue(String.class);
+                    if (currentUserId != null && !currentUserId.equals(userId)) {
+                        userIds.add(currentUserId);
+                    }
+                }
+                // Show dialog with users
+                AlertDialog.Builder builder = new AlertDialog.Builder(ProfileActivity.this);
+                builder.setTitle("Current users");
+
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(ProfileActivity.this, android.R.layout.simple_list_item_1, userIds);
+                builder.setAdapter(adapter, (dialog, which) -> {
+                    friendUserId = userIds.get(which); // Set the selected user ID to friendUserId variable
+                    addFriend();
+                });
+
+                builder.setNegativeButton("Cancel", (dialog, which) -> {
+                    dialog.dismiss();
+                });
+                builder.show();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(ProfileActivity.this, "Failed to retrieve user IDs: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+
+    public void addFriend() {
+        if (friendUserId == null) {
+            return;
+        }
+
+        DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
+
+        usersRef.orderByChild("userId").equalTo(userId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        User currentUser = snapshot.getValue(User.class);
+                        if (currentUser != null) {
+                            currentUser.addFriend(friendUserId);
+
+                            usersRef.child(snapshot.getKey()).setValue(currentUser)
+                                    .addOnSuccessListener(aVoid -> {
+                                        // Friend added successfully
+                                        Toast.makeText(ProfileActivity.this, friendUserId + " added successfully", Toast.LENGTH_SHORT).show();
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        // Failed to add friend, handle error
+                                        Toast.makeText(ProfileActivity.this, "Failed to add friend: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    });
+                        }
+                    }
+                } else {
+                    Toast.makeText(ProfileActivity.this, "User not found in database", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(ProfileActivity.this, "Database error: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
+
+        //Here i have to update the added friend list.
+    }
 
 
     private void showImageSelectionOptions() {
