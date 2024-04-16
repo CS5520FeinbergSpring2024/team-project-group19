@@ -1,7 +1,5 @@
 package edu.northeastern.echolist;
 
-import android.widget.Button;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +9,7 @@ public class User {
     private String profileImageUrl;
     private String profileImageData; // Add this field for base64-encoded image data
     private List<String> friends; // List of friends
+    private List<String> favorites;
 
     public User() {
 
@@ -24,6 +23,13 @@ public class User {
         this.userId = userId;
         this.password = password;
         this.profileImageUrl = profileImageUrl;
+    }
+
+    public User(String userId, String password, String profileImageUrl, List<String> favorites) {
+        this.userId = userId;
+        this.password = password;
+        this.profileImageUrl = profileImageUrl;
+        this.favorites = favorites;
     }
 
     public void setUserId(String userId){
@@ -66,6 +72,11 @@ public class User {
 
     public List<String> getFriends() {
         return friends;
+    }
+    public List<String> getFavorites() { return favorites; }
+
+    public void setFavorites(List<String> favorites) {
+        this.favorites = favorites;
     }
 
     public void removeFriend(String friendUserId) {
