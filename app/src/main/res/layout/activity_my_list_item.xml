@@ -20,27 +20,26 @@
         android:padding="10dp">
 
         <TextView
-            android:id="@+id/name"
+            android:id="@+id/event_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:textColor="@android:color/black"
-            android:textSize="15sp"
-            android:background="@null"
+            android:layout_marginTop="8dp"
+            android:text="Event Title"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
-        </TextView>
+            app:layout_constraintEnd_toEndOf="parent" />
 
-        <CheckBox
-            android:id="@+id/purchaseCheckbox"
-            android:layout_width="wrap_content"
+        <TextView
+            android:id="@+id/event_date"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/editbutton"/>
-
+            android:text="YYYY-MM-DD"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small"
+            app:layout_constraintTop_toBottomOf="@id/event_title"
+            app:layout_constraintStart_toStartOf="@id/event_title"
+            app:layout_constraintEnd_toEndOf="@id/event_title" />
 
         <Button
             android:id="@+id/editbutton"
@@ -53,7 +52,6 @@
             tools:ignore="MissingConstraints,TextSizeCheck">
 
         </Button>
-
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

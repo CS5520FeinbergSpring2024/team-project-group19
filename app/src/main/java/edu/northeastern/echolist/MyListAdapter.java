@@ -5,40 +5,40 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
-public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> {
+public class MyListAdapter extends RecyclerView.Adapter<MyListAdapter.ViewHolder> {
     private List<Event> eventsList;
+    private Button editButton;
 
-    public EventAdapter(Context context, List<Event> eventsList) {
+    public MyListAdapter(Context context, List<Event> eventsList) {
         this.eventsList = eventsList;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.activity_event_item_layout, parent, false);
-        return new ViewHolder(view, this);
+                .inflate(R.layout.activity_my_list_item, parent, false);
+        return new MyListAdapter.ViewHolder(view, this);
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(MyListAdapter.ViewHolder holder, int position) {
         Event event = eventsList.get(position);
         holder.titleTextView.setText(event.getTitle());
         holder.dateTextView.setText(event.getDate());
 
-        // when user taps on an item of the event recycler view, the click listener start the
-        // EventDetailActivity for the clicked event
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(v.getContext(), EventDetailActivity.class);
+                Intent intent = new Intent(v.getContext(), WishListActivity.class);
                 intent.putExtra("eventId", event.getEventId());
-                intent.putExtra("sourceActivity", "HomeActivity");
+                intent.putExtra("eventTitle", event.getTitle());
                 v.getContext().startActivity(intent);
             }
         });
@@ -60,15 +60,31 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
     }
 
 
-    // display the recycler view
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView titleTextView;
         public TextView dateTextView;
+        public Button editButton;
 
-        public ViewHolder(View itemView, EventAdapter eventAdapter) {
+        public ViewHolder(View itemView, MyListAdapter listAdapter) {
             super(itemView);
-            titleTextView = itemView.findViewById(R.id.event_title);
+            this.titleTextView = itemView.findViewById(R.id.event_title);
             dateTextView = itemView.findViewById(R.id.event_date);
+            this.editButton = itemView.findViewById(R.id.editbutton);
+
+            editButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int position = getAdapterPosition();
+                    if (position != RecyclerView.NO_POSITION) {
+                        Event event = listAdapter.eventsList.get(position);
+                        Intent intent = new Intent(v.getContext(), EventDetailActivity.class);
+                        intent.putExtra("eventId", event.getEventId());
+                        intent.putExtra("sourceActivity", "MyListActivity");
+                        v.getContext().startActivity(intent);
+                    }
+                }
+            });
         }
     }
+
 }
