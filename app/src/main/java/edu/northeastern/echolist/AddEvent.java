@@ -28,6 +28,7 @@ import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -42,9 +43,10 @@ import java.util.List;
  * create an instance of this fragment.
  */
 public class AddEvent extends Fragment {
-    private NavigationRouter navigationRouter;
-    private DatabaseReference events;
-    private String userId;
+    private final NavigationRouter navigationRouter;
+    private final DatabaseReference events;
+//    private final DatabaseReference friends;
+    private final String userId;
     private TextWatcher textWatcher;
     private EditText eventTitle;
     private EditText eventLocation;
@@ -87,10 +89,20 @@ public class AddEvent extends Fragment {
         eventLocation = view.findViewById(R.id.eventLocation);
         eventLocation.setOnClickListener(v -> openAutocompleteActivity());
         eventLocation.addTextChangedListener(textWatcher);
+        eventLocation.setOnFocusChangeListener((view12, b) -> {
+            if (b) {
+                openAutocompleteActivity();
+            }
+        });
 
         // date
         eventDate = view.findViewById(R.id.eventDate);
         eventDate.setOnClickListener(v -> showDateDialog());
+        eventDate.setOnFocusChangeListener((view1, b) -> {
+            if (b) {
+                showDateDialog();
+            }
+        });
         eventDate.addTextChangedListener(textWatcher);
 
         // friends
