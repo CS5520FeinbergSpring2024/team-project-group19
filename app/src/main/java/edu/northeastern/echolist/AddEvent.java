@@ -32,8 +32,11 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
@@ -45,7 +48,6 @@ import java.util.List;
 public class AddEvent extends Fragment {
     private final NavigationRouter navigationRouter;
     private final DatabaseReference events;
-//    private final DatabaseReference friends;
     private final String userId;
     private TextWatcher textWatcher;
     private EditText eventTitle;
@@ -107,6 +109,36 @@ public class AddEvent extends Fragment {
 
         // friends
         friendsSpinner = view.findViewById(R.id.friendsSpinner);
+        DatabaseReference user = FirebaseDatabase.getInstance().getReference("users");
+        Query userQuery = user.orderByChild("userId").equalTo(userId);
+        userQuery.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                Log.d("TAG", "DataSnapshot: " + snapshot.toString());
+                User user = snapshot.getValue(User.class);
+                if (user == null) {
+                    Log.d("TAG", "User object is null");
+                    return;
+                }
+                List<String> friends = user.getFriends();
+                if (friends == null || friends.isEmpty()) {
+                    Log.d("TAG", "Friends list is null or empty");
+                    return;
+                }
+                ArrayAdapter<String> friendAdapter = new ArrayAdapter<>(
+                        requireContext(),
+                        android.R.layout.simple_spinner_item,
+                        friends
+                );
+                friendAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                friendsSpinner.setAdapter(friendAdapter);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("TAG", "Error retrieving user data", error.toException());
+            }
+        });
 
         // categories
         categorySpinner = view.findViewById(R.id.categorySpinner);
