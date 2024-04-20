@@ -39,6 +39,7 @@
     <string name="select_date">Select Date</string>
     <string name="location">Location</string>
     <string name="title">Title</string>
+    <string name="gift_description_placeholder_string">Gift description</string>
     <item name="wishList_title" type="id" />
 
 
