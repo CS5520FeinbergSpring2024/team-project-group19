@@ -55,9 +55,7 @@ public class EventDetailActivity extends AppCompatActivity {
     private Spinner visibilitySpinner;
     private Button deleteEventButton;
     private Button updateEventButton;
-    private BottomNavigationView bottomNavigationView;
     private static final int AUTOCOMPLETE_REQUEST_CODE = 1;
-    private Button wishlistButton;
     private Button cancelButton;
 
 
@@ -84,7 +82,6 @@ public class EventDetailActivity extends AppCompatActivity {
         visibilitySpinner = findViewById(R.id.visibilitySpinner);
         deleteEventButton = findViewById(R.id.deleteEventButton);
         updateEventButton = findViewById(R.id.updateEventButton);
-        wishlistButton = findViewById(R.id.wishlistButton);
         cancelButton = findViewById(R.id.cancelButton);
 
         TextWatcher textWatcher = new TextWatcher() {
@@ -124,14 +121,7 @@ public class EventDetailActivity extends AppCompatActivity {
         if (eventId != null) {
             deleteEventButton.setVisibility(View.VISIBLE);
             updateEventButton.setVisibility(View.VISIBLE);
-            wishlistButton.setVisibility(View.VISIBLE);
             getEventDetailsAndUpdate(eventId);
-            wishlistButton.setOnClickListener(v -> {
-                Intent intent = new Intent(EventDetailActivity.this, WishListActivity.class);
-                intent.putExtra("eventId", eventId);
-                intent.putExtra("eventTitle", eventTitle.getText().toString());
-                startActivity(intent);
-            });
         }
 
         deleteEventButton.setOnClickListener(v -> new AlertDialog.Builder(EventDetailActivity.this)
