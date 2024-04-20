@@ -114,7 +114,7 @@ public class AddEvent extends Fragment {
         userQuery.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                Log.d("TAG", "DataSnapshot: " + snapshot.toString());
+                Log.d("TAG", "DataSnapshot: " + snapshot);
                 User user = snapshot.getValue(User.class);
                 if (user == null) {
                     Log.d("TAG", "User object is null");

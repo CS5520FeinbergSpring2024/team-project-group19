@@ -5,19 +5,17 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
-import android.text.Editable;
-import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
+import android.widget.MultiAutoCompleteTextView;
 import android.widget.Spinner;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
@@ -28,18 +26,16 @@ import java.util.List;
  * A simple {@link Fragment} subclass.
  */
 public class AddWishlistItem extends Fragment {
-    private TextWatcher textWatcher;
-    private NavigationRouter navigationRouter;
     private DatabaseReference events;
+    private DatabaseReference gifts;
     private String userId;
-    private EditText giftTitle;
-    private EditText descriptionTitle;
     private Spinner eventSpinner;
+    private List<String> selectedGifts = new ArrayList<>();
 
-    public AddWishlistItem(NavigationRouter navigationRouter, DatabaseReference events, String userId) {
-        this.navigationRouter = navigationRouter;
+    public AddWishlistItem(DatabaseReference events, String userId) {
         this.events = events;
         this.userId = userId;
+        gifts = FirebaseDatabase.getInstance().getReference("gifts");
     }
 
     @Override
@@ -53,17 +49,36 @@ public class AddWishlistItem extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_add_wishlist_item, container, false);
 
-        // watch for text input
-        initTextWatcher();
+        // gift selection
+        MultiAutoCompleteTextView giftTextView = view.findViewById(R.id.giftSelect);
+        giftTextView.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
+        giftTextView.setThreshold(0);
+        giftTextView.setOnItemClickListener((adapterView, view1, i, l) -> {
+           String selectedGift = (String) adapterView.getItemAtPosition(i);
+           if (selectedGift != null) {
+               selectedGifts.add(selectedGift);
+           }
+        });
+        gifts.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                List<String> giftTitles = new ArrayList<>();
+                for (DataSnapshot giftSnapshot: snapshot.getChildren()) {
+                    Gift gift = giftSnapshot.getValue(Gift.class);
+                    if (gift != null) {
+                        giftTitles.add(gift.getName());
+                    }
+                }
+                ArrayAdapter<String> giftAdapter = new ArrayAdapter<>(requireContext(),
+                        android.R.layout.simple_dropdown_item_1line, giftTitles);
+                giftTextView.setAdapter(giftAdapter);
+            }
 
-        // Init input fields
-        // title
-        giftTitle = view.findViewById(R.id.giftTitle);
-        giftTitle.addTextChangedListener(textWatcher);
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
 
-        // description
-        descriptionTitle = view.findViewById(R.id.descriptionTitle);
-        descriptionTitle.addTextChangedListener(textWatcher);
+            }
+        });
 
         // event selection
         eventSpinner = view.findViewById(R.id.eventSpinner);
@@ -98,21 +113,5 @@ public class AddWishlistItem extends Fragment {
         });
 
         return view;
-    }
-
-    private void initTextWatcher() {
-        textWatcher = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // Update the flag based on whether any text is entered
-                navigationRouter.setTextEntered(!TextUtils.isEmpty(s));
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {}
-        };
     }
 }
