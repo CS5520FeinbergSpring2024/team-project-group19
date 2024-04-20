@@ -33,20 +33,8 @@ public class Gift {
         return this.description;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public int getIsTrending() {
-        return this.isTrending;
-    }
-
     public String getImage() {
         return this.image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
     }
 
 }

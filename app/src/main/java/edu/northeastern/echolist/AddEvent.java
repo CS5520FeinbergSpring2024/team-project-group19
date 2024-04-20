@@ -184,7 +184,8 @@ public class AddEvent extends Fragment {
                     eventLocation.getText().toString(),
                     date,
                     categorySpinner.getSelectedItem().toString(),
-                    visibilitySpinner.getSelectedItem().toString()
+                    visibilitySpinner.getSelectedItem().toString(),
+                    new ArrayList<>()
             );
             assert eventId != null;
             events.child(eventId).addListenerForSingleValueEvent(new ValueEventListener() {

@@ -101,20 +101,10 @@ public class MyListActivity extends AppCompatActivity {
             Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content),
                     "Event deleted", Snackbar.LENGTH_LONG);
             snackbar.setAction("Undo", v -> {
-                Event restoredEvent = new Event(eventId, userId, eventTitle, eventLocation, eventDate, "","");
+                Event restoredEvent = new Event(eventId, userId, eventTitle, eventLocation, eventDate, "","", new ArrayList<>());
 
                 DatabaseReference databaseEvents = FirebaseDatabase.getInstance().getReference("events");
-                databaseEvents.child(eventId).setValue(restoredEvent).addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Toast.makeText(MyListActivity.this, "Event restored", Toast.LENGTH_SHORT).show();
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(MyListActivity.this, "Failed to restore event: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
+                databaseEvents.child(eventId).setValue(restoredEvent).addOnSuccessListener(aVoid -> Toast.makeText(MyListActivity.this, "Event restored", Toast.LENGTH_SHORT).show()).addOnFailureListener(e -> Toast.makeText(MyListActivity.this, "Failed to restore event: " + e.getMessage(), Toast.LENGTH_SHORT).show());
             });
             snackbar.show();
         }

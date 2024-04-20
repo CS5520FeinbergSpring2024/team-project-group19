@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.MultiAutoCompleteTextView;
 import android.widget.Spinner;
 
@@ -20,7 +21,9 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -29,8 +32,10 @@ public class AddWishlistItem extends Fragment {
     private DatabaseReference events;
     private DatabaseReference gifts;
     private String userId;
+    private Map<String, String> eventIds;
     private Spinner eventSpinner;
     private List<String> selectedGifts = new ArrayList<>();
+    private Button addGiftButton;
 
     public AddWishlistItem(DatabaseReference events, String userId) {
         this.events = events;
@@ -90,11 +95,12 @@ public class AddWishlistItem extends Fragment {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 List<String> eventTitles = new ArrayList<>();
-
+                eventIds = new HashMap<>();
                 for (DataSnapshot eventSnapshot : dataSnapshot.getChildren()) {
                     Event event = eventSnapshot.getValue(Event.class);
                     if (event != null) {
                         eventTitles.add(event.getTitle());
+                        eventIds.put(event.getTitle(), eventSnapshot.getKey());
                     }
                 }
                 ArrayAdapter<String> eventAdapter = new ArrayAdapter<String>(
@@ -112,6 +118,27 @@ public class AddWishlistItem extends Fragment {
             }
         });
 
+        addGiftButton = view.findViewById(R.id.addGiftButton);
+        addGiftButton.setOnClickListener(view12 -> { addItemsToWishlist(); });
+
         return view;
+    }
+
+    private void addItemsToWishlist() {
+        String eventTitle = eventSpinner.getSelectedItem().toString();
+        String eventId = eventIds.get(eventTitle);
+        if (eventId == null) {
+            return;
+        }
+        DatabaseReference wishList = FirebaseDatabase.getInstance().getReference("wishlists").child(eventId);
+
+        for (String gift: selectedGifts) {
+            String id = wishList.push().getKey();
+            WishListItem newItem = new WishListItem(id, gift);
+            if (id != null) {
+                wishList.child(id).setValue(newItem);
+            }
+        }
+
     }
 }
