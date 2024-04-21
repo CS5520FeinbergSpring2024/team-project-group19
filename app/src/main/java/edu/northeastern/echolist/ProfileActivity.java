@@ -215,8 +215,6 @@ public class ProfileActivity extends AppCompatActivity {
             return;
         }
 
-
-
         DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
 
         usersRef.orderByChild("userId").equalTo(targetUserId).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -244,6 +242,7 @@ public class ProfileActivity extends AppCompatActivity {
                 } else {
                     Toast.makeText(ProfileActivity.this, "Target user not found in database", Toast.LENGTH_SHORT).show();
                 }
+
             }
 
             @Override
@@ -386,7 +385,6 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void fetchAndUpdateFriendsList() {
-
         DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
 
         usersRef.orderByChild("userId").equalTo(userId).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -408,6 +406,8 @@ public class ProfileActivity extends AppCompatActivity {
                                 FriendAdapter friendAdapter = new FriendAdapter(friendsList);
                                 currentFriends.setAdapter(friendAdapter);
                             } else {
+                                RecyclerView currentFriends = findViewById(R.id.friends_list);
+                                currentFriends.setAdapter(null);
                                 Log.d("ProfileActivity", "User has no friends");
                                 Toast.makeText(ProfileActivity.this, "Add your friends!", Toast.LENGTH_SHORT).show();
                             }
