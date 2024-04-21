@@ -11,20 +11,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import android.os.Bundle;
-import android.widget.Toast;
-
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -40,6 +35,7 @@ import java.util.Map;
 
 public class WishListActivity extends AppCompatActivity {
     private WishListAdapter wishListAdapter;
+    private NavigationRouter navigationRouter;
     private RecyclerView wishListRecyclerView;
     private List<WishListItem> wishList = new ArrayList<>();
     private String eventId;
@@ -53,6 +49,10 @@ public class WishListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_wishlist_layout);
+
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+        navigationRouter = new NavigationRouter(bottomNavigationView, this);
+        navigationRouter.initNavigation();
 
         eventId = getIntent().getStringExtra("eventId");
         String eventTitle = getIntent().getStringExtra("eventTitle");
@@ -141,21 +141,18 @@ public class WishListActivity extends AppCompatActivity {
             showAddToWishListDialog(gift);
         });
 
-        toggleButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean shouldExpand = favoriteGiftsRecyclerView.getVisibility() != View.VISIBLE;
-                if (shouldExpand) {
-                    if (favoriteGifts.isEmpty()) {
-                        Toast.makeText(WishListActivity.this, "Add favorites from trending gifts on the home screen to use this feature!", Toast.LENGTH_SHORT).show();
-                    } else {
-                        animateRecyclerViewSlide(favoriteGiftsRecyclerView, true);
-                        toggleButton.setText("Hide");
-                    }
+        toggleButton.setOnClickListener(v -> {
+            boolean shouldExpand = favoriteGiftsRecyclerView.getVisibility() != View.VISIBLE;
+            if (shouldExpand) {
+                if (favoriteGifts.isEmpty()) {
+                    Toast.makeText(WishListActivity.this, "Add favorites from trending gifts on the home screen to use this feature!", Toast.LENGTH_SHORT).show();
                 } else {
-                    animateRecyclerViewSlide(favoriteGiftsRecyclerView, false);
-                    toggleButton.setText("Show");
+                    animateRecyclerViewSlide(favoriteGiftsRecyclerView, true);
+                    toggleButton.setText("Hide");
                 }
+            } else {
+                animateRecyclerViewSlide(favoriteGiftsRecyclerView, false);
+                toggleButton.setText("Show");
             }
         });
 
