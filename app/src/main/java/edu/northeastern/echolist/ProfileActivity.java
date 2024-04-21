@@ -85,7 +85,7 @@ public class ProfileActivity extends AppCompatActivity {
         RecyclerView.LayoutManager friendsLayoutManager = new LinearLayoutManager(this);
         currentFriends.setLayoutManager(friendsLayoutManager);
 
-        fetchAndUpdateFriendsList(currentFriends);
+        fetchAndUpdateFriendsList();
 
     }
 
@@ -150,6 +150,7 @@ public class ProfileActivity extends AppCompatActivity {
                                     .addOnSuccessListener(aVoid -> {
                                         // Friend added successfully
                                         Toast.makeText(ProfileActivity.this, friendUserId + " added successfully", Toast.LENGTH_SHORT).show();
+                                        fetchAndUpdateFriendsList();
                                     })
                                     .addOnFailureListener(e -> {
                                         // Failed to add friend, handle error
@@ -302,7 +303,7 @@ public class ProfileActivity extends AppCompatActivity {
         }
     }
 
-    private void fetchAndUpdateFriendsList(RecyclerView recyclerView) {
+    private void fetchAndUpdateFriendsList() {
 
         DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
 
