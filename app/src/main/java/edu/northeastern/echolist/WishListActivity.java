@@ -192,15 +192,12 @@ public class WishListActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Add to Wish List");
         builder.setMessage("Do you want to add \"" + gift.getName() + "\" to the wish list?");
-        builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String id = FirebaseDatabase.getInstance().getReference("wishlists").child(eventId).push().getKey();
-                int order = wishList.size();
-                WishListItem newItem = new WishListItem(id, gift.getName(), order);
-                if (id != null) {
-                    FirebaseDatabase.getInstance().getReference("wishlists").child(eventId).child(id).setValue(newItem);
-                }
+        builder.setPositiveButton("Add", (dialog, which) -> {
+            String id = FirebaseDatabase.getInstance().getReference("wishlists").child(eventId).push().getKey();
+            int order = wishList.size();
+            WishListItem newItem = new WishListItem(id, gift.getName(), false);
+            if (id != null) {
+                FirebaseDatabase.getInstance().getReference("wishlists").child(eventId).child(id).setValue(newItem);
             }
         });
         builder.setNegativeButton("Cancel", null);
