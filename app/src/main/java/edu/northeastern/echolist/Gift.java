@@ -37,4 +37,7 @@ public class Gift {
         return this.image;
     }
 
+    public Integer getIsTrending() {
+        return isTrending;
+    }
 }
