@@ -101,26 +101,6 @@
                 android:onClick="showDateDialog"
                 app:layout_constraintTop_toBottomOf="@id/eventDateLabel" />
 
-            <TextView
-                android:id="@+id/friendsTitle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:layout_marginTop="10dp"
-                android:text="Friends"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/eventDate"/>
-
-            <Spinner
-                android:id="@+id/friendsSpinner"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="0dp"
-                android:minHeight="48dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/friendsTitle" />
 
             <TextView
                 android:id="@+id/categoryTitle"
@@ -130,7 +110,7 @@
                 android:layout_marginTop="10dp"
                 android:text="Category"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/friendsSpinner"/>
+                app:layout_constraintTop_toBottomOf="@id/eventDate"/>
 
             <Spinner
                 android:id="@+id/categorySpinner"
