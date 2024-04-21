@@ -5,13 +5,14 @@ import java.io.Serializable;
 public class WishListItem {
     private String id;
     private String name;
-    private boolean purchased;
+    private Boolean purchased;
 
     public WishListItem() {}
 
-    public WishListItem(String id, String name) {
+    public WishListItem(String id, String name, Boolean purchased) {
         this.id = id;
         this.name = name;
+        this.purchased = purchased;
     }
 
     public String getId() {

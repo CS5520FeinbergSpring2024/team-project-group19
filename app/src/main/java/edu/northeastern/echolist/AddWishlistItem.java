@@ -134,7 +134,7 @@ public class AddWishlistItem extends Fragment {
 
         for (String gift: selectedGifts) {
             String id = wishList.push().getKey();
-            WishListItem newItem = new WishListItem(id, gift);
+            WishListItem newItem = new WishListItem(id, gift, false);
             if (id != null) {
                 wishList.child(id).setValue(newItem);
             }
