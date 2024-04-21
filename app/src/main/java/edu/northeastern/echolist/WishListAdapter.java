@@ -52,6 +52,14 @@ public class WishListAdapter extends RecyclerView.Adapter<WishListAdapter.ViewHo
         WishListItem wishListItem = wishList.get(position);
         holder.titleTextView.setText(wishListItem.getTitle());
 
+        if (wishListItem.isPurchased()) {
+            holder.moreButton.setVisibility(View.GONE);
+            holder.purchaseDisplay.setVisibility(View.VISIBLE);
+        } else {
+            holder.moreButton.setVisibility(View.VISIBLE);
+            holder.purchaseDisplay.setVisibility(View.GONE);
+        }
+
         holder.moreButton.setOnClickListener(v -> {
             PopupMenu menu = new PopupMenu(v.getContext(), holder.moreButton);
             menu.inflate(R.menu.gift_settings_menu);
@@ -60,6 +68,8 @@ public class WishListAdapter extends RecyclerView.Adapter<WishListAdapter.ViewHo
                     wishListItem.setPurchased(true);
                     DatabaseReference itemRef = FirebaseDatabase.getInstance().getReference("wishlists").child(eventId).child(wishListItem.getId());
                     itemRef.child("purchased").setValue(true);
+                    holder.purchaseDisplay.setVisibility(View.VISIBLE);
+                    holder.moreButton.setVisibility(View.GONE);
                 } else if (i.getItemId() == R.id.remove_gift) {
                     DatabaseReference itemRef = FirebaseDatabase.getInstance().getReference("wishlists").child(eventId).child(wishListItem.getId());
                     itemRef.removeValue()
@@ -87,35 +97,6 @@ public class WishListAdapter extends RecyclerView.Adapter<WishListAdapter.ViewHo
         return this.wishList;
     }
 
-    public void onWishListItemClick(WishListItem wishListItem) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        View view = LayoutInflater.from(context)
-                .inflate(R.layout.activity_add_wishlist_item_dialog, null);
-
-        builder.setView(view);
-
-        EditText nameAdd = view.findViewById(R.id.addName);
-
-        nameAdd.setText( wishListItem.getTitle());
-        nameAdd.setSelection( wishListItem.getTitle().length());
-
-        builder.setPositiveButton("Save", (dialogInterface, i) -> {
-            String newName = nameAdd.getText().toString();
-            if (!newName.isEmpty()) {
-                DatabaseReference databaseWishLists = FirebaseDatabase.getInstance().getReference("wishlists").child(eventId).child(wishListItem.getId());
-                databaseWishLists.child("title").setValue(newName).addOnSuccessListener(aVoid -> {
-                    // Data successfully updated in Firebase
-                    wishListItem.setTitle(newName);
-                    notifyDataSetChanged(); // refresh the RecyclerView
-                });
-            } else {
-                emptyEntryDialog();
-            }
-        });
-        builder.setNegativeButton("Cancel", null);
-        builder.create().show();
-    }
-
     private void emptyEntryDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Error");
@@ -126,12 +107,14 @@ public class WishListAdapter extends RecyclerView.Adapter<WishListAdapter.ViewHo
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView titleTextView;
+        public TextView purchaseDisplay;
         public ImageButton moreButton;
 
 
         public ViewHolder(View itemView, WishListAdapter wishListAdapter) {
             super(itemView);
             this.titleTextView = itemView.findViewById(R.id.name);
+            this.purchaseDisplay = itemView.findViewById(R.id.purchasedIndicator);
             moreButton = itemView.findViewById(R.id.moreButton);
         }
     }
