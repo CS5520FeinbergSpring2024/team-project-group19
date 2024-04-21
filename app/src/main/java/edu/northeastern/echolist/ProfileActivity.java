@@ -132,7 +132,7 @@ public class ProfileActivity extends AppCompatActivity {
 
 
 
-
+    // Method now implements a target friend, and a current user,
     public void addFriend(String targetUserId, String friendUserId) {
         if (targetUserId == null || friendUserId == null) {
             return;
@@ -172,6 +172,11 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
     }
+
+
+
+
+
 
     /*
     public void addFriend() {
@@ -362,13 +367,9 @@ public class ProfileActivity extends AppCompatActivity {
                             Log.d("ProfileActivity", "Current user: " + currentUser.getUserId());
                             List<String> friendsList = currentUser.getFriends();
 
-
-
-
                             if (friendsList != null && !friendsList.isEmpty()) {
                                 for (String friendId : friendsList) {
                                     Log.d("ProfileActivity", "Friend ID: " + friendId);
-                                    Toast.makeText(ProfileActivity.this, "Add your friends!", Toast.LENGTH_SHORT).show();
                                 }
 
                                 RecyclerView currentFriends = findViewById(R.id.friends_list);
@@ -376,6 +377,7 @@ public class ProfileActivity extends AppCompatActivity {
                                 currentFriends.setAdapter(friendAdapter);
                             } else {
                                 Log.d("ProfileActivity", "User has no friends");
+                                Toast.makeText(ProfileActivity.this, "Add your friends!", Toast.LENGTH_SHORT).show();
                             }
 
                         }
@@ -392,6 +394,10 @@ public class ProfileActivity extends AppCompatActivity {
         });
 
     }
+
+
+
+
 
 
 }
