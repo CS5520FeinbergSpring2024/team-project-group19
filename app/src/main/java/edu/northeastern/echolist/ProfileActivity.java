@@ -174,8 +174,58 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
 
+    public void onDeleteButtonClick(View view) {
+        // Retrieve the friend's user ID from the tag of the delete button
+        String friendUserId = (String) view.getTag(R.id.friend_name);
+        // Retrieve the target user ID from the SharedPreferences or wherever you store it
+        SharedPreferences sharedPreferences = getSharedPreferences("namePref", MODE_PRIVATE);
+        String targetUserId = sharedPreferences.getString("username", "User not found");
+
+        // Call deleteFriend with the appropriate parameters
+        deleteFriend(targetUserId, friendUserId);
+        deleteFriend(friendUserId, targetUserId);
+    }
 
 
+    private void deleteFriend(String targetUserId, String friendUserId) {
+        if (targetUserId == null || friendUserId == null) {
+            return;
+        }
+
+        DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
+
+        usersRef.orderByChild("userId").equalTo(targetUserId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        User targetUser = snapshot.getValue(User.class);
+                        if (targetUser != null) {
+                            targetUser.removeFriend(friendUserId); // Remove friendUserId from targetUserId's list of friends
+
+                            usersRef.child(snapshot.getKey()).setValue(targetUser)
+                                    .addOnSuccessListener(aVoid -> {
+                                        // Friend removed from target user's list of friends successfully
+                                        Toast.makeText(ProfileActivity.this, friendUserId + " removed from " + targetUserId + "'s list of friends", Toast.LENGTH_SHORT).show();
+                                        fetchAndUpdateFriendsList();
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        // Failed to remove friend from target user's list of friends, handle error
+                                        Toast.makeText(ProfileActivity.this, "Failed to remove friend from " + targetUserId + "'s list of friends: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    });
+                        }
+                    }
+                } else {
+                    Toast.makeText(ProfileActivity.this, "Target user not found in database", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(ProfileActivity.this, "Database error: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 
 
     /*
