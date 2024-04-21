@@ -108,7 +108,6 @@ public class AddEvent extends Fragment {
         eventDate.addTextChangedListener(textWatcher);
 
         // friends
-        friendsSpinner = view.findViewById(R.id.friendsSpinner);
         DatabaseReference user = FirebaseDatabase.getInstance().getReference("users");
         Query userQuery = user.orderByChild("userId").equalTo(userId);
         userQuery.addListenerForSingleValueEvent(new ValueEventListener() {
