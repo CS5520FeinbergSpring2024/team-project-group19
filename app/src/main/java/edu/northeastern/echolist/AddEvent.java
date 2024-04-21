@@ -64,7 +64,7 @@ public class AddEvent extends Fragment {
         navigationRouter = new NavigationRouter(bottomNavigationView, getActivity());
         navigationRouter.initNavigation();
 
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("namePref", Context.MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("namePref", requireContext().MODE_PRIVATE);
         userId = sharedPreferences.getString("username", "User");
 
 
