@@ -54,15 +54,11 @@ public class EventAdapter extends RecyclerView.Adapter<EventAdapter.ViewHolder> 
 
         // when user taps on an item of the event recycler view, the click listener start the
         // EventDetailActivity for the clicked event
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.i(TAG, "edit");
-                Intent intent = new Intent(v.getContext(), EventDetailActivity.class);
-                intent.putExtra("eventId", event.getEventId());
-                intent.putExtra("sourceActivity", "HomeActivity");
-                v.getContext().startActivity(intent);
-            }
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(v.getContext(), WishListActivity.class);
+            intent.putExtra("eventId", event.getEventId());
+            intent.putExtra("eventTitle", event.getTitle());
+            v.getContext().startActivity(intent);
         });
     }
 

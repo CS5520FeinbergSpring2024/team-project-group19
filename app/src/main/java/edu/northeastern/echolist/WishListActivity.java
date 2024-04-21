@@ -135,21 +135,18 @@ public class WishListActivity extends AppCompatActivity {
             showAddToWishListDialog(gift);
         });
 
-        toggleButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean shouldExpand = favoriteGiftsRecyclerView.getVisibility() != View.VISIBLE;
-                if (shouldExpand) {
-                    if (favoriteGifts.isEmpty()) {
-                        Toast.makeText(WishListActivity.this, "Add favorites from trending gifts on the home screen to use this feature!", Toast.LENGTH_SHORT).show();
-                    } else {
-                        animateRecyclerViewSlide(favoriteGiftsRecyclerView, true);
-                        toggleButton.setText("Hide");
-                    }
+        toggleButton.setOnClickListener(v -> {
+            boolean shouldExpand = favoriteGiftsRecyclerView.getVisibility() != View.VISIBLE;
+            if (shouldExpand) {
+                if (favoriteGifts.isEmpty()) {
+                    Toast.makeText(WishListActivity.this, "Add favorites from trending gifts on the home screen to use this feature!", Toast.LENGTH_SHORT).show();
                 } else {
-                    animateRecyclerViewSlide(favoriteGiftsRecyclerView, false);
-                    toggleButton.setText("Show");
+                    animateRecyclerViewSlide(favoriteGiftsRecyclerView, true);
+                    toggleButton.setText("Hide");
                 }
+            } else {
+                animateRecyclerViewSlide(favoriteGiftsRecyclerView, false);
+                toggleButton.setText("Show");
             }
         });
 
