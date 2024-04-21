@@ -113,7 +113,8 @@ public class ProfileActivity extends AppCompatActivity {
                 ArrayAdapter<String> adapter = new ArrayAdapter<>(ProfileActivity.this, android.R.layout.simple_list_item_1, userIds);
                 builder.setAdapter(adapter, (dialog, which) -> {
                     friendUserId = userIds.get(which); // Set the selected user ID to friendUserId variable
-                    addFriend();
+                    addFriend(userId, friendUserId);
+                    addFriend(friendUserId, userId);
                 });
 
                 builder.setNegativeButton("Cancel", (dialog, which) -> {
@@ -130,6 +131,49 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
 
+
+
+    public void addFriend(String targetUserId, String friendUserId) {
+        if (targetUserId == null || friendUserId == null) {
+            return;
+        }
+
+        DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
+
+        usersRef.orderByChild("userId").equalTo(targetUserId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        User targetUser = snapshot.getValue(User.class);
+                        if (targetUser != null) {
+                            targetUser.addFriend(friendUserId); // Add friendUserId to targetUserId's list of friends
+
+                            usersRef.child(snapshot.getKey()).setValue(targetUser)
+                                    .addOnSuccessListener(aVoid -> {
+                                        // Friend added to target user's list of friends successfully
+                                        Toast.makeText(ProfileActivity.this, friendUserId + " added to " + targetUserId + "'s list of friends", Toast.LENGTH_SHORT).show();
+                                        fetchAndUpdateFriendsList();
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        // Failed to add friend to target user's list of friends, handle error
+                                        Toast.makeText(ProfileActivity.this, "Failed to add friend to " + targetUserId + "'s list of friends: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    });
+                        }
+                    }
+                } else {
+                    Toast.makeText(ProfileActivity.this, "Target user not found in database", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(ProfileActivity.this, "Database error: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    /*
     public void addFriend() {
         if (friendUserId == null) {
             return;
@@ -171,7 +215,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         //Here i have to update the added friend list.
     }
-
+    */
 
     private void showImageSelectionOptions() {
         CharSequence[] options = {"Take Photo", "Choose from Gallery", "Cancel"};
@@ -317,14 +361,22 @@ public class ProfileActivity extends AppCompatActivity {
                             // Add debug log to check if currentUser is retrieved correctly
                             Log.d("ProfileActivity", "Current user: " + currentUser.getUserId());
                             List<String> friendsList = currentUser.getFriends();
-                            for (String friendId : friendsList) {
-                                Log.d("ProfileActivity", "Friend ID: " + friendId);
-                                // If you want to display each friend in a TextView or any other view, you can do it here
-                            }
 
-                            RecyclerView currentFriends = findViewById(R.id.friends_list);
-                            FriendAdapter friendAdapter = new FriendAdapter(friendsList);
-                            currentFriends.setAdapter(friendAdapter);
+
+
+
+                            if (friendsList != null && !friendsList.isEmpty()) {
+                                for (String friendId : friendsList) {
+                                    Log.d("ProfileActivity", "Friend ID: " + friendId);
+                                    Toast.makeText(ProfileActivity.this, "Add your friends!", Toast.LENGTH_SHORT).show();
+                                }
+
+                                RecyclerView currentFriends = findViewById(R.id.friends_list);
+                                FriendAdapter friendAdapter = new FriendAdapter(friendsList);
+                                currentFriends.setAdapter(friendAdapter);
+                            } else {
+                                Log.d("ProfileActivity", "User has no friends");
+                            }
 
                         }
                     }
@@ -340,5 +392,6 @@ public class ProfileActivity extends AppCompatActivity {
         });
 
     }
+
 
 }
