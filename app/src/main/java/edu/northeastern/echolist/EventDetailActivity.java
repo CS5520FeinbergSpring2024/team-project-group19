@@ -45,7 +45,6 @@ import java.util.Calendar;
 import java.util.List;
 
 public class EventDetailActivity extends AppCompatActivity {
-    protected TextView userIdTextView;
     private EditText eventTitle;
     private EditText eventLocation;
     private EditText eventDate;
@@ -53,11 +52,8 @@ public class EventDetailActivity extends AppCompatActivity {
     private boolean textEntered;
     private Spinner categorySpinner;
     private Spinner visibilitySpinner;
-    private Button deleteEventButton;
     private Button updateEventButton;
-    private BottomNavigationView bottomNavigationView;
     private static final int AUTOCOMPLETE_REQUEST_CODE = 1;
-    private Button wishlistButton;
     private Button cancelButton;
 
 
@@ -69,12 +65,7 @@ public class EventDetailActivity extends AppCompatActivity {
         SharedPreferences sharedPreferences = getSharedPreferences("namePref", MODE_PRIVATE);
         String userId = sharedPreferences.getString("username", "User");
 
-        // Set the user ID to the TextView
-        userIdTextView = findViewById(R.id.userId_textview);
-        userIdTextView.setText(userId);
-
         DatabaseReference databaseEvents = FirebaseDatabase.getInstance().getReference("events");
-
 
         eventTitle = findViewById(R.id.eventTitle);
         eventLocation = findViewById(R.id.eventLocation);
@@ -82,9 +73,7 @@ public class EventDetailActivity extends AppCompatActivity {
         friendsSpinner = findViewById(R.id.friendsSpinner);
         categorySpinner = findViewById(R.id.categorySpinner);
         visibilitySpinner = findViewById(R.id.visibilitySpinner);
-        deleteEventButton = findViewById(R.id.deleteEventButton);
         updateEventButton = findViewById(R.id.updateEventButton);
-        wishlistButton = findViewById(R.id.wishlistButton);
         cancelButton = findViewById(R.id.cancelButton);
 
         TextWatcher textWatcher = new TextWatcher() {
@@ -122,59 +111,9 @@ public class EventDetailActivity extends AppCompatActivity {
         // Fetch event data based on eventId
         String eventId = getIntent().getStringExtra("eventId");
         if (eventId != null) {
-            deleteEventButton.setVisibility(View.VISIBLE);
             updateEventButton.setVisibility(View.VISIBLE);
-            wishlistButton.setVisibility(View.VISIBLE);
             getEventDetailsAndUpdate(eventId);
-            wishlistButton.setOnClickListener(v -> {
-                Intent intent = new Intent(EventDetailActivity.this, WishListActivity.class);
-                intent.putExtra("eventId", eventId);
-                intent.putExtra("eventTitle", eventTitle.getText().toString());
-                startActivity(intent);
-            });
         }
-
-        deleteEventButton.setOnClickListener(v -> new AlertDialog.Builder(EventDetailActivity.this)
-                .setMessage("Are you sure you want to delete this event")
-                .setPositiveButton("Delete", (dialog, which) -> {
-                    DatabaseReference eventRef = databaseEvents.child(eventId);
-
-                    eventRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            Event event = snapshot.getValue(Event.class);
-                            if (event != null) {
-                                Event deletedEvent = new Event(event.getEventId(),
-                                        event.getUserId(), event.getTitle(),
-                                        event.getLocation(), event.getDate(),
-                                        event.getCategory(),event.getVisibility(),
-                                        new ArrayList<>());
-
-                                snapshot.getRef().removeValue()
-                                        .addOnSuccessListener(unused -> {
-                                            Intent intent = new Intent(EventDetailActivity.this, HomeActivity.class);
-                                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                            // pass data between EventDetailActivity and HomeActivity
-                                            intent.putExtra("eventDeleted", true);
-                                            intent.putExtra("deletedEventId", deletedEvent.getEventId());
-                                            intent.putExtra("deletedEventTitle", deletedEvent.getTitle());
-                                            intent.putExtra("deletedEventLocation", deletedEvent.getLocation());
-                                            intent.putExtra("deletedEventDate", deletedEvent.getDate());
-                                            intent.putExtra("deletedEventUserId", deletedEvent.getUserId());
-                                            startActivity(intent);
-                                            finish();
-                                        }).addOnFailureListener(e -> Toast.makeText(EventDetailActivity.this, "Failed to delete event: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
-                })
-                .setNegativeButton("Cancel", null)
-                .show());
 
         cancelButton.setOnClickListener(v -> {
             // initialize activityClass as HomeActivity.class

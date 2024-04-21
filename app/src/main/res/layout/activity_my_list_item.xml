@@ -41,17 +41,16 @@
             app:layout_constraintStart_toStartOf="@id/event_title"
             app:layout_constraintEnd_toEndOf="@id/event_title" />
 
-        <Button
-            android:id="@+id/editbutton"
-            android:layout_width="66dp"
-            android:layout_height="37dp"
-            android:text="Edit"
-            android:textSize="10dp"
+        <ImageButton
+            android:id="@+id/moreButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="MissingConstraints,TextSizeCheck">
-
-        </Button>
+            card_view:layout_constraintBottom_toBottomOf="parent"
+            card_view:srcCompat="@drawable/baseline_more_vert_24"
+            tools:layout_editor_absoluteX="255dp" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
