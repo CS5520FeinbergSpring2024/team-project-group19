@@ -3,6 +3,7 @@ package edu.northeastern.echolist;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -26,8 +27,9 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        String friendName = friendsList.get(position);
-        holder.friendName.setText(friendName);
+        String friendUserId = friendsList.get(position);
+        holder.friendName.setText(friendUserId);
+        holder.buttonDelete.setTag(R.id.friend_name, friendUserId);
     }
 
     @Override
@@ -37,10 +39,12 @@ public class FriendAdapter extends RecyclerView.Adapter<FriendAdapter.ViewHolder
 
     public class ViewHolder extends RecyclerView.ViewHolder{
         public TextView friendName;
+        public Button buttonDelete;
 
         public ViewHolder(View itemView) {
             super(itemView);
             friendName = itemView.findViewById(R.id.friend_name);
+            buttonDelete = itemView.findViewById(R.id.delete_button);
         }
     }
 }
