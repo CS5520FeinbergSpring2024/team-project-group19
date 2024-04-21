@@ -8,18 +8,14 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
@@ -29,7 +25,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
-
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -66,10 +61,6 @@ public class HomeActivity extends AppCompatActivity {
         // Retrieve the user ID from sharedPreference
         SharedPreferences sharedPreferences = getSharedPreferences("namePref", MODE_PRIVATE);
         String userId = sharedPreferences.getString("username", "User");
-
-        // Set the user ID to the TextView
-        TextView userIdTextView = findViewById(R.id.userId_textview);
-        userIdTextView.setText(userId);
 
         RecyclerView myEventRecyclerView = findViewById(R.id.my_events_recyclerview);
         RecyclerView.LayoutManager lLayoutManager = new LinearLayoutManager(this,
