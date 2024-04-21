@@ -39,7 +39,9 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class HomeActivity extends AppCompatActivity {
     private List<Event> eventsList = new ArrayList<>();
@@ -173,6 +175,9 @@ public class HomeActivity extends AppCompatActivity {
                 initializeGiftAdapter();
             }
         });
+
+        handleUpcomingEventChildAddedFriends(userId);
+
     }
 
     @Override
@@ -338,6 +343,57 @@ public class HomeActivity extends AppCompatActivity {
             }
         }
     }
+
+
+
+    private void handleUpcomingEventChildAddedFriends(String userId) {
+        DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
+        usersRef.orderByChild("userId").equalTo(userId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    Set<String> friendsSet = new HashSet<>();
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        User currentUser = snapshot.getValue(User.class);
+                        if (currentUser != null) {
+                            // Add debug log to check if currentUser is retrieved correctly
+                            Log.d("Debuggy", "Current user: " + currentUser.getUserId());
+                            List<String> friendsList = currentUser.getFriends();
+
+                            if (friendsList != null && !friendsList.isEmpty()) {
+                                for (String friendId : friendsList) {
+                                    Log.d("ProfileActivity", "Friend ID: " + friendId);
+                                    friendsSet.add(friendId);
+                                }
+                            }
+                        }
+                    }
+                    Log.d("HandleFriends", "Friends set: " + friendsSet);
+
+                    for (String friendId : friendsSet) {
+                        fetchPublicEventsForFriend(friendId);
+                    }
+
+                } else {
+                    Log.d("HandleFriends", "No data found for user: " + userId);
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Log.e("HandleFriends", "Error fetching user data: " + databaseError.getMessage());
+            }
+        });
+
+
+    }
+
+
+    private void fetchPublicEventsForFriend(String friendId) {
+        for the friend, pick its events.
+            sortedEventsList.add(event);
+            Collections.sort(sortedEventsList, eventDateComparator);
+    }
+
 
     // Comparator for sorted events.
     Comparator<Event> eventDateComparator = (e1, e2) -> {
