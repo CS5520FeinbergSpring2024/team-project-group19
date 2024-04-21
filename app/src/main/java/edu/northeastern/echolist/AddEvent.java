@@ -6,6 +6,7 @@ import static android.content.ContentValues.TAG;
 
 import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -28,6 +29,7 @@ import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -57,10 +59,16 @@ public class AddEvent extends Fragment {
     private Spinner visibilitySpinner;
     private Spinner friendsSpinner;
 
-    public AddEvent(NavigationRouter navigationRouter, DatabaseReference events, String userId) {
-        this.navigationRouter = navigationRouter;
-        this.events = events;
-        this.userId = userId;
+    public AddEvent() {
+        BottomNavigationView bottomNavigationView = getActivity().findViewById(R.id.bottom_navigation);
+        navigationRouter = new NavigationRouter(bottomNavigationView, getActivity());
+        navigationRouter.initNavigation();
+
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("namePref", Context.MODE_PRIVATE);
+        userId = sharedPreferences.getString("username", "User");
+
+
+        events = FirebaseDatabase.getInstance().getReference("events");
     }
 
     @Override

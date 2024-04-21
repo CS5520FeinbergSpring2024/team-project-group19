@@ -41,7 +41,7 @@ public class NewItemActivity extends AppCompatActivity {
         String userId = sharedPreferences.getString("username", "User");
 
         ViewPagerHelper viewpager = new ViewPagerHelper(getSupportFragmentManager());
-        viewpager.addFragment(new AddEvent(navigationRouter, events, userId), "New Event");
+        viewpager.addFragment(new AddEvent(), "New Event");
         viewpager.addFragment(new AddWishlistItem(navigationRouter, events, userId), "New Wishlist Item");
         viewPager.setAdapter(viewpager);
     }
