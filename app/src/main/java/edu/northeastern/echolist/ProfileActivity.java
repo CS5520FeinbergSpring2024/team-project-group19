@@ -7,6 +7,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -46,6 +48,7 @@ public class ProfileActivity extends AppCompatActivity {
     private String userId;
     private Button addFriendButton;
     private String friendUserId; // String that contains the selected friendID
+    private RecyclerView.Adapter friendsViewAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,6 +80,13 @@ public class ProfileActivity extends AppCompatActivity {
                 addFriendAction(view);
             }
         });
+
+        RecyclerView currentFriends = findViewById(R.id.friends_list);
+        RecyclerView.LayoutManager friendsLayoutManager = new LinearLayoutManager(this);
+        currentFriends.setLayoutManager(friendsLayoutManager);
+
+        fetchAndUpdateFriendsList(currentFriends);
+
     }
 
 
@@ -157,8 +167,6 @@ public class ProfileActivity extends AppCompatActivity {
                 Toast.makeText(ProfileActivity.this, "Database error: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
-
-
 
         //Here i have to update the added friend list.
     }
@@ -292,6 +300,44 @@ public class ProfileActivity extends AppCompatActivity {
                 Toast.makeText(this, "Camera permission is required to take a photo", Toast.LENGTH_SHORT).show();
             }
         }
+    }
+
+    private void fetchAndUpdateFriendsList(RecyclerView recyclerView) {
+
+        DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
+
+        usersRef.orderByChild("userId").equalTo(userId).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                        User currentUser = snapshot.getValue(User.class);
+                        if (currentUser != null) {
+                            // Add debug log to check if currentUser is retrieved correctly
+                            Log.d("ProfileActivity", "Current user: " + currentUser.getUserId());
+                            List<String> friendsList = currentUser.getFriends();
+                            for (String friendId : friendsList) {
+                                Log.d("ProfileActivity", "Friend ID: " + friendId);
+                                // If you want to display each friend in a TextView or any other view, you can do it here
+                            }
+
+                            RecyclerView currentFriends = findViewById(R.id.friends_list);
+                            FriendAdapter friendAdapter = new FriendAdapter(friendsList);
+                            currentFriends.setAdapter(friendAdapter);
+
+                        }
+                    }
+                } else {
+                    Toast.makeText(ProfileActivity.this, "User not found in database", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(ProfileActivity.this, "Database error: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
     }
 
 }
