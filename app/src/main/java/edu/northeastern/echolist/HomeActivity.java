@@ -305,7 +305,8 @@ public class HomeActivity extends AppCompatActivity {
 
     private void handleUpcomingEventChildAdded(DataSnapshot snapshot) {
         Event event = snapshot.getValue(Event.class);
-
+        SharedPreferences sharedPreferences = getSharedPreferences("namePref", MODE_PRIVATE);
+        int numEventsToShow = sharedPreferences.getInt("numEvents", 2);
         if (event != null) {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
             Date eventDate = null;
@@ -327,8 +328,8 @@ public class HomeActivity extends AppCompatActivity {
                 sortedEventsList.add(event);
                 Collections.sort(sortedEventsList, eventDateComparator);
 
-                if (sortedEventsList.size() > 2) {
-                    sortedEventsList.subList(2, sortedEventsList.size()).clear();
+                if (sortedEventsList.size() > numEventsToShow) {
+                    sortedEventsList.subList(numEventsToShow, sortedEventsList.size()).clear();
                 }
 
                 upcomingEventsList.clear();

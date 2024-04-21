@@ -23,6 +23,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -49,7 +50,7 @@ public class ProfileActivity extends AppCompatActivity {
     private Button addFriendButton;
     private String friendUserId; // String that contains the selected friendID
     private RecyclerView.Adapter friendsViewAdapter;
-
+    private EditText numEventsEditText;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,8 +88,26 @@ public class ProfileActivity extends AppCompatActivity {
 
         fetchAndUpdateFriendsList();
 
+        numEventsEditText = findViewById(R.id.num_events_edittext);
+
     }
 
+    public void saveNumEvents(View view) {
+        String numEventsString = numEventsEditText.getText().toString();
+        if (!numEventsString.isEmpty()) {
+            try {
+                int numEvents = Integer.parseInt(numEventsString);
+                SharedPreferences.Editor editor = getSharedPreferences("namePref", MODE_PRIVATE).edit();
+                editor.putInt("numEvents", numEvents);
+                editor.apply();
+                Toast.makeText(this, "Please restart the app to apply preferences.", Toast.LENGTH_SHORT).show();
+            } catch (NumberFormatException e) {
+                Toast.makeText(this, "Please enter a valid number", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            Toast.makeText(this, "You can modify the number of events to show!", Toast.LENGTH_SHORT).show();
+        }
+    }
 
     public void addFriendAction(View view){
             showUserSelectionDialog(); //Popping up dialog to pick from
