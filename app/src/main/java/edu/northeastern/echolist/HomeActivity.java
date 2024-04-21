@@ -29,7 +29,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 
 
 import java.text.ParseException;
@@ -49,12 +48,9 @@ public class HomeActivity extends AppCompatActivity {
     private GiftAdapter giftAdapter;
     private GiftViewModel giftViewModel;
     private RecyclerView trendingGiftsRecyclerView;
-    private List<Gift> gifts = new ArrayList<>();
+    private final List<Gift> gifts = new ArrayList<>();
+    private final List<GiftItem> giftItems = new ArrayList<>();
     private List<String> favoriteGiftIds = new ArrayList<>();
-    private boolean giftsLoaded = false;
-    private boolean favoritesLoaded = false;
-    protected TextView userIdTextView;
-    private Event deletedEvent;
 
 
     @Override
@@ -161,18 +157,22 @@ public class HomeActivity extends AppCompatActivity {
         giftViewModel = new ViewModelProvider(this).get(GiftViewModel.class);
         trendingGiftsRecyclerView = findViewById(R.id.trending_gift_recyclerview);
         setupGiftRecyclerView();
-        fetchTrendingGifts();
+
         if (giftViewModel.getFavoriteGiftIds().getValue() == null) {
             giftViewModel.fetchUserFavorites(getUserId());
         }
+        giftViewModel.getGiftItemsLiveData().observe(this, giftItems -> {
+            if (giftItems != null && !giftItems.isEmpty()) {
+                initializeGiftAdapter(giftItems);
+            }
+        });
         giftViewModel.getFavoriteGiftIds().observe(this, favoriteGiftIds -> {
             if (favoriteGiftIds != null) {
                 this.favoriteGiftIds = favoriteGiftIds;
-                Log.d("Home-getFavoriteGiftIds", "Favorite IDs loaded: " + favoriteGiftIds);
-                favoritesLoaded = true;
-                initializeGiftAdapter();
+                Log.d("HomeActivity", "Favorite gift IDs: " + favoriteGiftIds);
             }
         });
+        giftViewModel.fetchGiftData(getUserId(), 5);
     }
 
     @Override
@@ -246,61 +246,99 @@ public class HomeActivity extends AppCompatActivity {
 
     }
 
-    private void initializeGiftAdapter() {
-        if (giftsLoaded && favoritesLoaded && giftAdapter == null) {
-            giftAdapter = new GiftAdapter(gifts, favoriteGiftIds, (gift, isFavorite) -> {
-                if (isFavorite) {
-                    giftViewModel.addGiftToUserFavorites(getUserId(), gift.getGiftId(), new GiftViewModel.OperationCallback() {
-                        @Override
-                        public void onSuccess() {
-                            favoriteGiftIds.add(gift.getGiftId());
-                            giftAdapter.notifyDataSetChanged();
-                        }
-
-                        @Override
-                        public void onError(String error) {
-                            Toast.makeText(HomeActivity.this, "Error adding to favorites: " + error, Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                } else {
-                    giftViewModel.removeGiftFromUserFavorites(getUserId(), gift.getGiftId(), new GiftViewModel.OperationCallback() {
-                        @Override
-                        public void onSuccess() {
-                            favoriteGiftIds.remove(gift.getGiftId());
-                            giftAdapter.notifyDataSetChanged();
-                        }
-
-                        @Override
-                        public void onError(String error) {
-                            Toast.makeText(HomeActivity.this, "Error removing from favorites: " + error, Toast.LENGTH_SHORT).show();
-                        }
-                    });
+    private void initializeGiftAdapter(List<GiftItem> giftItems) {
+        if (giftAdapter == null) {
+            giftAdapter = new GiftAdapter(this, giftItems, new GiftAdapter.OnGiftFavoriteListener() {
+                @Override
+                public void onGiftFavoriteChanged(Gift gift, boolean isFavorite) {
+                    if (isFavorite) {
+                        addToFavorites(gift.getGiftId());
+                    } else {
+                        removeFromFavorites(gift.getGiftId());
+                    }
                 }
-            }, gift -> {
-                GiftDialog dialog = GiftDialog.newInstance(gift.getDescription());
+            }, giftItem -> {
+                Gift gift = giftItem;
+                boolean isFavorite = favoriteGiftIds.contains(gift.getGiftId());
+                String buttonText = isFavorite ? "Remove from Favorites" : "Add to Favorites";
+                GiftDialog dialog = GiftDialog.newInstance(gift.getGiftId(), gift.getName(), gift.getDescription(), buttonText, (giftId, giftName) -> {
+                    if (isFavorite) {
+                        removeFromFavorites(gift.getGiftId());
+                    } else {
+                        addToFavorites(gift.getGiftId());
+                    }
+                    for (int i = 0; i < giftItems.size(); i++) {
+                        if (giftItems.get(i).getGiftId().equals(giftId)) {
+                            giftItems.get(i).setFavorite(!isFavorite);
+                            giftAdapter.notifyItemChanged(i);
+                            break;
+                        }
+                    }
+                });
+                dialog.setOnDismissListener(() -> giftAdapter.notifyDataSetChanged());
                 dialog.show(getSupportFragmentManager(), "GiftDialog");
             });
             trendingGiftsRecyclerView.setAdapter(giftAdapter);
+        } else {
+            giftAdapter.setGiftItems(giftItems);
         }
     }
 
-    private void fetchTrendingGifts() {
-        giftViewModel.fetchTrendingGifts(5, new GiftViewModel.DataLoadCallback<Gift>() {
+    private void addToFavorites(String giftId) {
+        giftViewModel.addGiftToUserFavorites(getUserId(), giftId, new GiftViewModel.OperationCallback() {
             @Override
-            public void onDataLoaded(List<Gift> loadedGifts) {
-                gifts = loadedGifts;
-                Log.d("Home-FetchTrendingGifts", "Trending gifts loaded: " + gifts);
-                Log.d("Home-FetchTrendingGifts", "Trending gifts loaded flag: " + giftsLoaded);
-                giftsLoaded = true;
-                Log.d("Home-FetchTrendingGifts", "Trending gifts loaded flag: " + giftsLoaded);
-                initializeGiftAdapter();
+            public void onSuccess() {
+                Toast.makeText(HomeActivity.this, "Added to favorites", Toast.LENGTH_SHORT).show();
+                Log.d("HomeActivity", "Gift added to favorites: " + giftId);
+                Log.d("HomeActivity", "Current favorite gift IDs: " + favoriteGiftIds);
+                favoriteGiftIds.add(giftId);
+                for (int i = 0; i < giftItems.size(); i++) {
+                    if (giftItems.get(i).getGiftId().equals(giftId)) {
+                        giftItems.get(i).setFavorite(true);
+                        giftAdapter.notifyItemChanged(i);
+                        break;
+                    }
+                }
             }
 
             @Override
-            public void onDataNotAvailable(String error) {
-                Toast.makeText(HomeActivity.this, "Failed to load gifts: " + error, Toast.LENGTH_LONG).show();
+            public void onError(String error) {
+                Toast.makeText(HomeActivity.this, "Error adding to favorites: " + error, Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void removeFromFavorites(String giftId) {
+        giftViewModel.removeGiftFromUserFavorites(getUserId(), giftId, new GiftViewModel.OperationCallback() {
+            @Override
+            public void onSuccess() {
+                Toast.makeText(HomeActivity.this, "Removed from favorites", Toast.LENGTH_SHORT).show();
+                Log.d("HomeActivity", "Gift removed from favorites: " + giftId);
+                Log.d("HomeActivity", "Current favorite gift IDs: " + favoriteGiftIds);
+                favoriteGiftIds.remove(giftId);
+                for (int i = 0; i < giftItems.size(); i++) {
+                    if (giftItems.get(i).getGiftId().equals(giftId)) {
+                        giftItems.get(i).setFavorite(false);
+                        giftAdapter.notifyItemChanged(i);
+                        break;
+                    }
+                }
+            }
+
+            @Override
+            public void onError(String error) {
+                Toast.makeText(HomeActivity.this, "Error removing from favorites: " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private int getGiftPosition(String giftId) {
+        for (int i = 0; i < gifts.size(); i++) {
+            if (gifts.get(i).getGiftId().equals(giftId)) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     private void handleUpcomingEventChildAdded(DataSnapshot snapshot) {

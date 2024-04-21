@@ -1,5 +1,6 @@
 package edu.northeastern.echolist;
 
+import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,16 +18,14 @@ import java.util.List;
 
 public class GiftAdapter extends RecyclerView.Adapter<GiftAdapter.GiftViewHolder> {
 
-    private final List<Gift> giftList;
-    private final List<String> favoriteGiftIds;
+    private List<GiftItem> giftList;
     private final OnGiftFavoriteListener favoriteListener;
     private final OnGiftClickListener cardListener;
+    private Context context;
 
-
-    public GiftAdapter(List<Gift> giftList, List<String> favoriteGiftIds, OnGiftFavoriteListener favoriteListener, OnGiftClickListener cardListener) {
+    public GiftAdapter(Context context, List<GiftItem> giftList, OnGiftFavoriteListener favoriteListener, OnGiftClickListener cardListener) {
+        this.context = context;
         this.giftList = giftList;
-        this.favoriteGiftIds = favoriteGiftIds;
-        Log.d("GiftAdapter", "Favorite IDs set: " + favoriteGiftIds);
         this.favoriteListener = favoriteListener;
         this.cardListener = cardListener;
     }
@@ -40,49 +39,35 @@ public class GiftAdapter extends RecyclerView.Adapter<GiftAdapter.GiftViewHolder
 
     @Override
     public void onBindViewHolder(@NonNull GiftViewHolder holder, int position) {
-        Gift gift = giftList.get(position);
-        if (gift.getGiftId() == null) {
-            Log.e("GiftAdapter", "Gift at position " + position + " has a null giftId");
-        }
-
-        boolean isFavorite = favoriteGiftIds.contains(gift.getGiftId());
-        Log.d("GiftAdapter", "Gift ID: " + gift.getGiftId() + ", isFavorite: " + isFavorite);
+        GiftItem giftItem = giftList.get(position);
+        Log.d("GiftAdapter", "onBindViewHolder called for gift at position " + giftList.get(position));
+        Gift gift = giftItem;
 
         holder.giftNameTextView.setText(gift.getName());
-
-        // using Glide image loading library
         Glide.with(holder.itemView.getContext()).load(gift.getImage()).into(holder.giftImageView);
 
         holder.favoriteCheckBox.setOnCheckedChangeListener(null);
-        holder.favoriteCheckBox.setChecked(isFavorite);
+        holder.favoriteCheckBox.setChecked(giftItem.isFavorite());
         holder.favoriteCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (favoriteListener != null) {
                 favoriteListener.onGiftFavoriteChanged(gift, isChecked);
             }
         });
-        holder.favoriteCheckBox.setVisibility(View.VISIBLE);
-
-        holder.itemView.post(() -> {
-            holder.favoriteCheckBox.setOnCheckedChangeListener(null);
-            holder.favoriteCheckBox.setChecked(isFavorite);
+        if (context instanceof WishListActivity) {
+            holder.favoriteCheckBox.setVisibility(View.GONE);
+        } else {
             holder.favoriteCheckBox.setVisibility(View.VISIBLE);
-            holder.favoriteCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (favoriteListener != null) {
-                    favoriteListener.onGiftFavoriteChanged(gift, isChecked);
-                }
-            });
-        });
-    }
-
-    @Override
-    public void onViewRecycled(@NonNull GiftViewHolder holder) {
-        super.onViewRecycled(holder);
-        holder.favoriteCheckBox.setOnCheckedChangeListener(null);
+        }
     }
 
     @Override
     public int getItemCount() {
         return giftList.size();
+    }
+
+    public void setGiftItems(List<GiftItem> giftItems) {
+        this.giftList = giftItems;
+        notifyDataSetChanged();
     }
 
     public class GiftViewHolder extends RecyclerView.ViewHolder {

@@ -16,6 +16,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 public class GiftViewModel extends ViewModel {
@@ -24,8 +25,10 @@ public class GiftViewModel extends ViewModel {
     private final DatabaseReference userRef = dbRef.child("users");
     private final DatabaseReference giftsRef = dbRef.child("gifts");
     private final MutableLiveData<List<String>> favoriteGiftIdsLiveData = new MutableLiveData<>();
+    private final MutableLiveData<List<GiftItem>> giftItemsLiveData = new MutableLiveData<>();
 
-    public GiftViewModel() {}
+    private List<Gift> cachedTrendingGifts;
+
 
     public void getUserKey(String userId, OnUserKeyFetchedListener listener) {
         userRef.orderByChild("userId").equalTo(userId)
@@ -57,7 +60,15 @@ public class GiftViewModel extends ViewModel {
         return favoriteGiftIdsLiveData;
     }
 
-    public void fetchTrendingGifts(int maxGifts, DataLoadCallback<Gift> callback) {
+    public LiveData<List<GiftItem>> getGiftItemsLiveData() {
+        return giftItemsLiveData;
+    }
+
+    public void fetchGiftData(String userId, int maxGifts) {
+        if (cachedTrendingGifts != null) {
+            updateGiftItems(cachedTrendingGifts);
+            return;
+        }
         giftsRef.orderByChild("isTrending").equalTo(1).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -70,17 +81,76 @@ public class GiftViewModel extends ViewModel {
                 }
                 if (!gifts.isEmpty()) {
                     List<Gift> selectedGifts = selectRandomGifts(gifts, maxGifts);
-                    callback.onDataLoaded(selectedGifts);
+                    cachedTrendingGifts = selectedGifts;
+                    fetchUserFavorites(userId, selectedGifts);
                 } else {
-                    callback.onDataNotAvailable("No trending gifts found.");
+                    giftItemsLiveData.setValue(Collections.emptyList());
                 }
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                callback.onDataNotAvailable(error.getMessage());
+                Log.e("GiftViewModel", "Error fetching trending gifts: " + error.getMessage());
             }
         });
+    }
+
+    private void fetchUserFavorites(String userId, List<Gift> gifts) {
+        getUserKey(userId, userKey -> {
+            if (userKey != null) {
+                DatabaseReference userFavoritesRef = dbRef.child("users").child(userKey).child("favoritedGifts");
+                userFavoritesRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        List<String> favoriteGiftIds = new ArrayList<>();
+                        for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                            String giftId = snapshot.getKey();
+                            favoriteGiftIds.add(giftId);
+                        }
+                        favoriteGiftIdsLiveData.setValue(favoriteGiftIds);
+                        updateGiftItems(gifts);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        Log.e("fetchUserFavorites", databaseError.getMessage());
+                    }
+                });
+            } else {
+                Log.e("fetchUserFavorites", "User key not found.");
+            }
+        });
+    }
+
+    public void fetchGiftItems(List<String> favoriteGiftIds) {
+        giftsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                List<GiftItem> items = new ArrayList<>();
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    GiftItem item = snapshot.getValue(GiftItem.class);
+                    if (item != null && favoriteGiftIds.contains(item.getGiftId())) {
+                        items.add(item);
+                    }
+                }
+                giftItemsLiveData.postValue(items);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("GiftViewModel", "Error fetching gift items: " + error.getMessage());
+            }
+        });
+    }
+
+    private void updateGiftItems(List<Gift> gifts) {
+        List<String> favoriteIds = favoriteGiftIdsLiveData.getValue();
+        if (favoriteIds != null) {
+            List<GiftItem> giftItems = gifts.stream()
+                    .map(gift -> new GiftItem(gift, favoriteIds.contains(gift.getGiftId())))
+                    .collect(Collectors.toList());
+            giftItemsLiveData.setValue(giftItems);
+        }
     }
 
     public void fetchUserFavorites(String userId) {
@@ -140,11 +210,6 @@ public class GiftViewModel extends ViewModel {
 
     public interface OnUserKeyFetchedListener {
         void onUserKeyFetched(String userKey);
-    }
-
-    public interface DataLoadCallback<T> {
-        void onDataLoaded(List<T> data);
-        void onDataNotAvailable(String error);
     }
 
     public interface OperationCallback {

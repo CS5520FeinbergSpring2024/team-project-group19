@@ -39,6 +39,10 @@
     <string name="select_date">Select Date</string>
     <string name="location">Location</string>
     <string name="title">Title</string>
+    <string name="gift_description_placeholder_string">Gift description</string>
+    <string name="favorite_gifts_string">Add from your Favorite Gifts</string>
+    <string name="toggle_vibility_button_string">Hide</string>
+    <string name="add_to_wishlist_description_string">Add to Wishlist</string>
     <item name="wishList_title" type="id" />
     <string name="event">Event</string>
     <string name="description">Description</string>
