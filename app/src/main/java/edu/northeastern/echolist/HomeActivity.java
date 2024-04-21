@@ -262,7 +262,7 @@ public class HomeActivity extends AppCompatActivity {
 
     private void initializeGiftAdapter(List<GiftItem> giftItems) {
         if (giftAdapter == null) {
-            giftAdapter = new GiftAdapter(giftItems, new GiftAdapter.OnGiftFavoriteListener() {
+            giftAdapter = new GiftAdapter(this, giftItems, new GiftAdapter.OnGiftFavoriteListener() {
                 @Override
                 public void onGiftFavoriteChanged(Gift gift, boolean isFavorite) {
                     if (isFavorite) {

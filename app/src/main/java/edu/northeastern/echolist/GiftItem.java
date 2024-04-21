@@ -8,6 +8,10 @@ and independent of activities and views
 public class GiftItem extends Gift {
     private boolean isFavorite;
 
+    public GiftItem() {
+
+    }
+
     public GiftItem(Gift gift, boolean isFavorite) {
         super(gift.getGiftId(), gift.getName(), gift.getDescription(), gift.getIsTrending(), gift.getImage());
         this.isFavorite = isFavorite;

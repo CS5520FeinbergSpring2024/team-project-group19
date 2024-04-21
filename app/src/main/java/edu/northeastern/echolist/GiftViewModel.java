@@ -95,7 +95,7 @@ public class GiftViewModel extends ViewModel {
         });
     }
 
-    private void fetchUserFavorites(String userId, List<Gift> trendingGifts) {
+    private void fetchUserFavorites(String userId, List<Gift> gifts) {
         getUserKey(userId, userKey -> {
             if (userKey != null) {
                 DatabaseReference userFavoritesRef = dbRef.child("users").child(userKey).child("favoritedGifts");
@@ -108,7 +108,7 @@ public class GiftViewModel extends ViewModel {
                             favoriteGiftIds.add(giftId);
                         }
                         favoriteGiftIdsLiveData.setValue(favoriteGiftIds);
-                        updateGiftItems(trendingGifts);
+                        updateGiftItems(gifts);
                     }
 
                     @Override
@@ -118,6 +118,27 @@ public class GiftViewModel extends ViewModel {
                 });
             } else {
                 Log.e("fetchUserFavorites", "User key not found.");
+            }
+        });
+    }
+
+    public void fetchGiftItems(List<String> favoriteGiftIds) {
+        giftsRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                List<GiftItem> items = new ArrayList<>();
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                    GiftItem item = snapshot.getValue(GiftItem.class);
+                    if (item != null && favoriteGiftIds.contains(item.getGiftId())) {
+                        items.add(item);
+                    }
+                }
+                giftItemsLiveData.postValue(items);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("GiftViewModel", "Error fetching gift items: " + error.getMessage());
             }
         });
     }

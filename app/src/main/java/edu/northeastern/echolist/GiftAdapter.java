@@ -1,5 +1,6 @@
 package edu.northeastern.echolist;
 
+import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,8 +21,10 @@ public class GiftAdapter extends RecyclerView.Adapter<GiftAdapter.GiftViewHolder
     private List<GiftItem> giftList;
     private final OnGiftFavoriteListener favoriteListener;
     private final OnGiftClickListener cardListener;
+    private Context context;
 
-    public GiftAdapter(List<GiftItem> giftList, OnGiftFavoriteListener favoriteListener, OnGiftClickListener cardListener) {
+    public GiftAdapter(Context context, List<GiftItem> giftList, OnGiftFavoriteListener favoriteListener, OnGiftClickListener cardListener) {
+        this.context = context;
         this.giftList = giftList;
         this.favoriteListener = favoriteListener;
         this.cardListener = cardListener;
@@ -37,7 +40,6 @@ public class GiftAdapter extends RecyclerView.Adapter<GiftAdapter.GiftViewHolder
     @Override
     public void onBindViewHolder(@NonNull GiftViewHolder holder, int position) {
         GiftItem giftItem = giftList.get(position);
-        holder.favoriteCheckBox.setVisibility(View.VISIBLE);
         Log.d("GiftAdapter", "onBindViewHolder called for gift at position " + giftList.get(position));
         Gift gift = giftItem;
 
@@ -51,8 +53,11 @@ public class GiftAdapter extends RecyclerView.Adapter<GiftAdapter.GiftViewHolder
                 favoriteListener.onGiftFavoriteChanged(gift, isChecked);
             }
         });
-        holder.favoriteCheckBox.setVisibility(View.VISIBLE);
-        Log.d("GiftAdapter", "Checkbox for " + gift.getGiftId() + " is " + holder.favoriteCheckBox.getVisibility());
+        if (context instanceof WishListActivity) {
+            holder.favoriteCheckBox.setVisibility(View.GONE);
+        } else {
+            holder.favoriteCheckBox.setVisibility(View.VISIBLE);
+        }
     }
 
     @Override
