@@ -1,6 +1,5 @@
 package edu.northeastern.echolist;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Event {
@@ -11,13 +10,12 @@ public class Event {
     private String userId;
     private String category;
     private String visibility;
-    private List<String> wishListIds;
+    private List<String> friends;
 
-    public Event() {
-        this.wishListIds = new ArrayList<>();
-    }
+    public Event() {}
 
-    public Event(String eventId, String userId, String title, String location, String date, String category,String visibility) {
+    public Event(String eventId, String userId, String title, String location, String date,
+                 String category,String visibility, List<String> friends) {
         this.eventId = eventId;
         this.userId = userId;
         this.title = title;
@@ -25,15 +23,11 @@ public class Event {
         this.date = date;
         this.category = category;
         this.visibility = visibility;
+        this.friends = friends;
     }
-
 
     public String getEventId() {
         return this.eventId;
-    }
-
-    public void setEventId(String eventId) {
-        this.eventId = eventId;
     }
 
     public String getTitle() {
@@ -52,30 +46,15 @@ public class Event {
         return this.location;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
     public String getDate() {
         return this.date;
-    }
-
-    public void setDate(String date) {
-        this.date = date;
     }
 
     public String getCategory() {
         return this.category;
     }
 
-    public void setCategory(String category) {
-        this.category = category;
-    }
     public String getVisibility() {
         return visibility;
-    }
-
-    public void setVisibility(String visibility) {
-        this.visibility = visibility;
     }
 }

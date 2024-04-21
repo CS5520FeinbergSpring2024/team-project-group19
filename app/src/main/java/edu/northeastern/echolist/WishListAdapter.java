@@ -1,23 +1,18 @@
 package edu.northeastern.echolist;
 
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.PopupMenu;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -27,7 +22,6 @@ public class WishListAdapter extends RecyclerView.Adapter<WishListAdapter.ViewHo
     private List<WishListItem> wishList;
     private Context context;
     private String eventId;
-    private Button editButton;
 
     public WishListAdapter(Context context, List<WishListItem> wishList, String eventId) {
         this.wishList = wishList;
@@ -42,22 +36,55 @@ public class WishListAdapter extends RecyclerView.Adapter<WishListAdapter.ViewHo
         return new WishListAdapter.ViewHolder(view, this);
     }
 
+    // Method to remove an item from the local list
+    public void removeWishlistItem(String itemId) {
+        for (int i = 0; i < wishList.size(); i++) {
+            if (wishList.get(i).getId().equals(itemId)) {
+                wishList.remove(i);
+                notifyItemChanged(i); // Notify adapter that data at index i has changed
+                return;
+            }
+        }
+    }
+
     @Override
     public void onBindViewHolder(WishListAdapter.ViewHolder holder, int position) {
         WishListItem wishListItem = wishList.get(position);
         holder.titleTextView.setText(wishListItem.getTitle());
-        holder.purchaseCheckBox.setChecked(wishListItem.isPurchased());
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // trigger onWishListItemClick when user taps on an item of the wishlist recycler
-                // view. the onWishListItemClick is for editing the wishlist item
-                onWishListItemClick(wishListItem);
-//                Intent intent = new Intent(v.getContext(), WishListActivity.class);
-//                intent.putExtra("wishListId", wishListItem.getId());
-//                v.getContext().startActivity(intent);
-            }
+        if (wishListItem.isPurchased()) {
+            holder.moreButton.setVisibility(View.GONE);
+            holder.purchaseDisplay.setVisibility(View.VISIBLE);
+        } else {
+            holder.moreButton.setVisibility(View.VISIBLE);
+            holder.purchaseDisplay.setVisibility(View.GONE);
+        }
+
+        holder.moreButton.setOnClickListener(v -> {
+            PopupMenu menu = new PopupMenu(v.getContext(), holder.moreButton);
+            menu.inflate(R.menu.gift_settings_menu);
+            menu.setOnMenuItemClickListener(i -> {
+                if (i.getItemId() == R.id.purchase_gift) {
+                    wishListItem.setPurchased(true);
+                    DatabaseReference itemRef = FirebaseDatabase.getInstance().getReference("wishlists").child(eventId).child(wishListItem.getId());
+                    itemRef.child("purchased").setValue(true);
+                    holder.purchaseDisplay.setVisibility(View.VISIBLE);
+                    holder.moreButton.setVisibility(View.GONE);
+                } else if (i.getItemId() == R.id.remove_gift) {
+                    DatabaseReference itemRef = FirebaseDatabase.getInstance().getReference("wishlists").child(eventId).child(wishListItem.getId());
+                    itemRef.removeValue()
+                            .addOnSuccessListener(unused -> {
+                                // Remove the item from the local list and notify the adapter
+                                removeWishlistItem(wishListItem.getId());
+                                Toast.makeText(v.getContext(), "Gift removed from wishlist", Toast.LENGTH_SHORT).show();
+                            })
+                            .addOnFailureListener(e -> {
+                                Toast.makeText(v.getContext(), "Failed to remove gift from wishlist: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            });
+                }
+                return true;
+            });
+            menu.show();
         });
     }
 
@@ -70,43 +97,6 @@ public class WishListAdapter extends RecyclerView.Adapter<WishListAdapter.ViewHo
         return this.wishList;
     }
 
-    public void onWishListItemClick(WishListItem wishListItem) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        View view = LayoutInflater.from(context)
-                .inflate(R.layout.activity_add_wishlist_item_dialog, null);
-
-        builder.setView(view);
-
-        EditText nameAdd = view.findViewById(R.id.addName);
-
-        String originalName = wishListItem.getTitle();
-
-        nameAdd.setText( wishListItem.getTitle());
-        nameAdd.setSelection( wishListItem.getTitle().length());
-
-        builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                String newName = nameAdd.getText().toString();
-                if (!newName.isEmpty()) {
-                    DatabaseReference databaseWishLists = FirebaseDatabase.getInstance().getReference("wishlists").child(eventId).child(wishListItem.getId());
-                    databaseWishLists.child("title").setValue(newName).addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            // Data successfully updated in Firebase
-                            wishListItem.setTitle(newName);
-                            notifyDataSetChanged(); // refresh the RecyclerView
-                        }
-                    });
-                } else {
-                    emptyEntryDialog();
-                }
-            }
-        });
-        builder.setNegativeButton("Cancel", null);
-        builder.create().show();
-    }
-
     private void emptyEntryDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle("Error");
@@ -115,90 +105,17 @@ public class WishListAdapter extends RecyclerView.Adapter<WishListAdapter.ViewHo
         builder.create().show();
     }
 
-    public void editWishListItem(int index) {
-        WishListItem wishListItem = wishList.get(index);
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        View view = LayoutInflater.from(context)
-                .inflate(R.layout.activity_add_wishlist_item_dialog, null);
-
-        builder.setView(view);
-
-        EditText nameAdd = view.findViewById(R.id.addName);
-
-        String originalName = wishListItem.getTitle();
-
-        nameAdd.setText( wishListItem.getTitle());
-        nameAdd.setSelection( wishListItem.getTitle().length());
-
-        builder.setPositiveButton("Save", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                String newName = nameAdd.getText().toString();
-                if (!newName.isEmpty()) {
-                    DatabaseReference databaseWishLists = FirebaseDatabase.getInstance().getReference("wishlists").child(eventId).child(wishListItem.getId());
-                    databaseWishLists.child("title").setValue(newName).addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            // Data successfully updated in Firebase
-                            wishListItem.setTitle(newName);
-                            notifyDataSetChanged(); // refresh the RecyclerView
-                        }
-                    });
-                } else {
-                    emptyEntryDialog();
-                }
-            }
-        });
-        builder.setNegativeButton("Cancel", null);
-        builder.create().show();
-    }
-
-
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView titleTextView;
-        private Button editButton;
-        public CheckBox purchaseCheckBox;
+        public TextView purchaseDisplay;
+        public ImageButton moreButton;
+
 
         public ViewHolder(View itemView, WishListAdapter wishListAdapter) {
             super(itemView);
             this.titleTextView = itemView.findViewById(R.id.name);
-            this.editButton = itemView.findViewById(R.id.editbutton);
-            purchaseCheckBox = itemView.findViewById(R.id.purchaseCheckbox);
-
-            // checkbox for user to select
-            purchaseCheckBox.setOnCheckedChangeListener(((buttonView, isChecked) -> {
-                int position = getAdapterPosition();
-                if (position != RecyclerView.NO_POSITION) {
-                    WishListItem item = wishListAdapter.getWishList().get(position);
-                    item.setPurchased(isChecked);
-                    DatabaseReference itemRef = FirebaseDatabase.getInstance().getReference("wishlists").child(wishListAdapter.eventId).child(item.getId());
-                    itemRef.child("purchased").setValue(isChecked);
-                }
-                })
-            );
-
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    int index = getLayoutPosition();
-                    if (index != RecyclerView.NO_POSITION) {
-                        wishListAdapter.onWishListItemClick(wishListAdapter.getWishList().get(index));
-                    }
-                }
-            });
-
-            // press the edit button will trigger editWishListItem which allows user to edit the
-            // wishlist item
-            editButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    int index = getAdapterPosition();
-                    if (index != RecyclerView.NO_POSITION) {
-                        wishListAdapter.editWishListItem(index);
-                    }
-                }
-            });
-
+            this.purchaseDisplay = itemView.findViewById(R.id.purchasedIndicator);
+            moreButton = itemView.findViewById(R.id.moreButton);
         }
     }
 

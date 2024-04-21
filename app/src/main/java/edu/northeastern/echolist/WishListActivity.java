@@ -22,6 +22,9 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import android.os.Bundle;
+import android.widget.Toast;
+
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -30,15 +33,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 
 public class WishListActivity extends AppCompatActivity {
-    private FloatingActionButton fabAddWishListItem;
     private WishListAdapter wishListAdapter;
     private RecyclerView wishListRecyclerView;
     private List<WishListItem> wishList = new ArrayList<>();
@@ -63,7 +63,6 @@ public class WishListActivity extends AppCompatActivity {
             getSupportActionBar().setTitle(eventTitle + " Wish List");
         }
 
-        fabAddWishListItem = findViewById(R.id.fabAddWishListItem);
         wishListRecyclerView = findViewById(R.id.wishlist_recyclerview);
 
         wishListRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -82,54 +81,12 @@ public class WishListActivity extends AppCompatActivity {
                     wishList.add(item);
                 }
 
-                // ensure wish list items are ordered by the order property
-                Collections.sort(wishList, new Comparator<WishListItem>() {
-                    @Override
-                    public int compare(WishListItem o1, WishListItem o2) {
-                        return Integer.compare(o1.getOrder(), o2.getOrder());
-                    }
-                });
-
                 wishListAdapter.notifyDataSetChanged(); // Refresh the list
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
                 Toast.makeText(WishListActivity.this, "Failed to load data.", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        fabAddWishListItem.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(WishListActivity.this);
-                builder.setTitle("Add Wish List Item");
-
-                View view = getLayoutInflater().inflate(R.layout.activity_add_wishlist_item_dialog, null);
-                builder.setView(view);
-
-                EditText nameAdd = view.findViewById(R.id.addName);
-
-                builder.setPositiveButton("Add", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                        String name = nameAdd.getText().toString();
-                        if (!name.isEmpty()) {
-                            String id = databaseWishLists.push().getKey();
-                            int order = wishList.size();
-                            WishListItem newItem = new WishListItem(id, name, order);
-                            if (id != null) {
-                                databaseWishLists.child(id).setValue(newItem);
-                            }
-                        } else {
-                            // a error dialog will show if name and url are empty
-                            emptyEntryDialog();
-                        }
-                    }
-                });
-                builder.setNegativeButton("Cancel", null);
-                builder.create().show();
-
             }
         });
 
@@ -165,13 +122,10 @@ public class WishListActivity extends AppCompatActivity {
                         wishListAdapter.notifyItemRemoved(index);
                         Snackbar snackbar = Snackbar.make(wishListRecyclerView,
                                                 "Wish List Item is deleted", Snackbar.LENGTH_SHORT)
-                                        .setAction("Undo", new View.OnClickListener() {
-                                            @Override
-                                            public void onClick(View v) {
-                                                itemRef.setValue(deletedWishListItem);
-                                                wishList.add(index, deletedWishListItem);
-                                                wishListAdapter.notifyItemInserted(index);
-                                            }
+                                        .setAction("Undo", v -> {
+                                            itemRef.setValue(deletedWishListItem);
+                                            wishList.add(index, deletedWishListItem);
+                                            wishListAdapter.notifyItemInserted(index);
                                         });
                                 snackbar.show();
                     }

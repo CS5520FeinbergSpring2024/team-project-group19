@@ -2,7 +2,7 @@
     <string name="app_name">Echolist</string>
     <string name="home">Home</string>
     <string name="add">Add</string>
-    <string name="my_list">My List</string>
+    <string name="my_list">My Lists</string>
     <string name="trending_gifts_string">Trending Gifts</string>
     <string name="my_events_string">My Events</string>
     <string name="upcoming_events_string">Upcoming Events</string>
@@ -25,14 +25,14 @@
         <item>Networking Event</item>
         <item>Fundraiser</item>
     </string-array>
-  
+
     <string-array name="visibility_options">
         <item>Public</item>
         <item>Private</item>
     </string-array>
-  
+
     <string name="wishlist_string">Wish List</string>
-    <string name="save_event">Save Event</string>
+    <string name="save_event">Create Event</string>
     <string name="visibility">Visibility</string>
     <string name="category">Category</string>
     <string name="friends">Friends</string>
@@ -44,6 +44,11 @@
     <string name="toggle_vibility_button_string">Hide</string>
     <string name="add_to_wishlist_description_string">Add to Wishlist</string>
     <item name="wishList_title" type="id" />
+    <string name="event">Event</string>
+    <string name="description">Description</string>
+    <string name="create_gift">Add Gifts</string>
+    <string name="type_to_filter_gifts">Type to add gifts</string>
+    <string name="gifts">Gifts</string>
 
 
 </resources>

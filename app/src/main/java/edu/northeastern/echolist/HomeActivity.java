@@ -84,13 +84,10 @@ public class HomeActivity extends AppCompatActivity {
         Query eventsByUser = databaseEvents.orderByChild("userId").equalTo(userId);
 
         ImageView userIcon = findViewById(R.id.user_icon);
-        userIcon.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Launch ProfileActivity on user icon click
-                Intent intent = new Intent(HomeActivity.this, ProfileActivity.class);
-                startActivity(intent);
-            }
+        userIcon.setOnClickListener(v -> {
+            // Launch ProfileActivity on user icon click
+            Intent intent = new Intent(HomeActivity.this, ProfileActivity.class);
+            startActivity(intent);
         });
 
         eventsByUser.addChildEventListener(new ChildEventListener() {
@@ -192,24 +189,16 @@ public class HomeActivity extends AppCompatActivity {
 
             Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content),
                     "Event deleted", Snackbar.LENGTH_LONG);
-            snackbar.setAction("Undo", new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Event restoredEvent = new Event(eventId, userId, eventTitle, eventLocation, eventDate, "","");
+            snackbar.setAction("Undo", v -> {
+                Event restoredEvent = new Event(eventId, userId, eventTitle, eventLocation, eventDate, "","", new ArrayList<>());
 
-                    DatabaseReference databaseEvents = FirebaseDatabase.getInstance().getReference("events");
-                    databaseEvents.child(eventId).setValue(restoredEvent).addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            Toast.makeText(HomeActivity.this, "Event restored", Toast.LENGTH_SHORT).show();
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Toast.makeText(HomeActivity.this, "Failed to restore event: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }
+                DatabaseReference databaseEvents = FirebaseDatabase.getInstance().getReference("events");
+                databaseEvents.child(eventId).setValue(restoredEvent).addOnSuccessListener(aVoid -> Toast.makeText(HomeActivity.this, "Event restored", Toast.LENGTH_SHORT).show()).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(HomeActivity.this, "Failed to restore event: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
             });
             snackbar.show();
         }
@@ -235,19 +224,16 @@ public class HomeActivity extends AppCompatActivity {
     public void onBackPressed() {
         new AlertDialog.Builder(this)
                 .setMessage("Do you want to log out?")
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        FirebaseAuth.getInstance().signOut();
-                        SharedPreferences sharedPreferences = getSharedPreferences("namePref", MODE_PRIVATE);
-                        SharedPreferences.Editor editor = sharedPreferences.edit();
-                        editor.clear();
-                        editor.apply();
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    FirebaseAuth.getInstance().signOut();
+                    SharedPreferences sharedPreferences = getSharedPreferences("namePref", MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.clear();
+                    editor.apply();
 
-                        Intent intent = new Intent(HomeActivity.this, SignInActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
-                    }
+                    Intent intent = new Intent(HomeActivity.this, SignInActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
                 })
                 .setNegativeButton("No", null)
                 .show();
@@ -391,18 +377,15 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     // Comparator for sorted events.
-    Comparator<Event> eventDateComparator = new Comparator<Event>() {
-        @Override
-        public int compare(Event e1, Event e2) {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            try {
-                Date date1 = dateFormat.parse(e1.getDate());
-                Date date2 = dateFormat.parse(e2.getDate());
-                return date1.compareTo(date2);
-            } catch (ParseException e) {
-                e.printStackTrace();
-                return 0;
-            }
+    Comparator<Event> eventDateComparator = (e1, e2) -> {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            Date date1 = dateFormat.parse(e1.getDate());
+            Date date2 = dateFormat.parse(e2.getDate());
+            return date1.compareTo(date2);
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return 0;
         }
     };
 }

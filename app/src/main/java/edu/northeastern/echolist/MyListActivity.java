@@ -1,39 +1,26 @@
 package edu.northeastern.echolist;
 
-import static android.content.ContentValues.TAG;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,9 +28,6 @@ import java.util.List;
 public class MyListActivity extends AppCompatActivity {
 
     private List<Event> eventsList = new ArrayList<>();
-    protected TextView userIdTextView;
-    private Event deletedEvent;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +35,6 @@ public class MyListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_my_list);
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
-        bottomNavigationView.setSelectedItemId(R.id.page_view_posts);
         NavigationRouter navigationRouter = new NavigationRouter(bottomNavigationView, this);
         navigationRouter.initNavigation();
 
@@ -101,22 +84,6 @@ public class MyListActivity extends AppCompatActivity {
 
             }
         });
-
-        bottomNavigationView.setSelectedItemId(R.id.page_view_posts);
-        bottomNavigationView.setOnItemSelectedListener(item -> {
-            if (item.getItemId() == R.id.page_home) {
-                Intent intent = new Intent(MyListActivity.this, HomeActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                return true;
-            } else if (item.getItemId() == R.id.page_add_post) {
-                Intent intent = new Intent(MyListActivity.this, AddItemActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
-                return true;
-            }
-            return false;
-        });
     }
 
     @Override
@@ -133,24 +100,11 @@ public class MyListActivity extends AppCompatActivity {
 
             Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content),
                     "Event deleted", Snackbar.LENGTH_LONG);
-            snackbar.setAction("Undo", new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Event restoredEvent = new Event(eventId, userId, eventTitle, eventLocation, eventDate, "","");
+            snackbar.setAction("Undo", v -> {
+                Event restoredEvent = new Event(eventId, userId, eventTitle, eventLocation, eventDate, "","", new ArrayList<>());
 
-                    DatabaseReference databaseEvents = FirebaseDatabase.getInstance().getReference("events");
-                    databaseEvents.child(eventId).setValue(restoredEvent).addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            Toast.makeText(MyListActivity.this, "Event restored", Toast.LENGTH_SHORT).show();
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Toast.makeText(MyListActivity.this, "Failed to restore event: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }
+                DatabaseReference databaseEvents = FirebaseDatabase.getInstance().getReference("events");
+                databaseEvents.child(eventId).setValue(restoredEvent).addOnSuccessListener(aVoid -> Toast.makeText(MyListActivity.this, "Event restored", Toast.LENGTH_SHORT).show()).addOnFailureListener(e -> Toast.makeText(MyListActivity.this, "Failed to restore event: " + e.getMessage(), Toast.LENGTH_SHORT).show());
             });
             snackbar.show();
         }
@@ -159,14 +113,6 @@ public class MyListActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-    }
-
-    // Logout confirmation Dialog from Home page.
-    @Override
-    public void onBackPressed() {
-        Intent intent = new Intent(MyListActivity.this, HomeActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
     }
 
 }
