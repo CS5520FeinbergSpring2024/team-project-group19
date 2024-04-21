@@ -29,6 +29,7 @@ import java.util.Map;
  * A simple {@link Fragment} subclass.
  */
 public class AddWishlistItem extends Fragment {
+    private NavigationRouter navigationRouter;
     private DatabaseReference events;
     private DatabaseReference gifts;
     private String userId;
@@ -37,7 +38,8 @@ public class AddWishlistItem extends Fragment {
     private List<String> selectedGifts = new ArrayList<>();
     private Button addGiftButton;
 
-    public AddWishlistItem(DatabaseReference events, String userId) {
+    public AddWishlistItem(NavigationRouter navigationRouter, DatabaseReference events, String userId) {
+        this.navigationRouter = navigationRouter;
         this.events = events;
         this.userId = userId;
         gifts = FirebaseDatabase.getInstance().getReference("gifts");
@@ -139,6 +141,6 @@ public class AddWishlistItem extends Fragment {
                 wishList.child(id).setValue(newItem);
             }
         }
-
+        navigationRouter.navigate(MyListActivity.class);
     }
 }
