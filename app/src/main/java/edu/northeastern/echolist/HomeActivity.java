@@ -281,9 +281,12 @@ public class HomeActivity extends AppCompatActivity {
                     } else {
                         addToFavorites(gift.getGiftId());
                     }
-                    int position = getGiftPosition(giftId);
-                    if (position != -1) {
-                        giftAdapter.notifyItemChanged(position);
+                    for (int i = 0; i < giftItems.size(); i++) {
+                        if (giftItems.get(i).getGiftId().equals(giftId)) {
+                            giftItems.get(i).setFavorite(!isFavorite);
+                            giftAdapter.notifyItemChanged(i);
+                            break;
+                        }
                     }
                 });
                 dialog.setOnDismissListener(() -> giftAdapter.notifyDataSetChanged());
@@ -303,10 +306,12 @@ public class HomeActivity extends AppCompatActivity {
                 Log.d("HomeActivity", "Gift added to favorites: " + giftId);
                 Log.d("HomeActivity", "Current favorite gift IDs: " + favoriteGiftIds);
                 favoriteGiftIds.add(giftId);
-                int position = getGiftPosition(giftId);
-                if (position != -1) {
-                    giftItems.get(position).setFavorite(true);
-                    giftAdapter.notifyItemChanged(position);
+                for (int i = 0; i < giftItems.size(); i++) {
+                    if (giftItems.get(i).getGiftId().equals(giftId)) {
+                        giftItems.get(i).setFavorite(true);
+                        giftAdapter.notifyItemChanged(i);
+                        break;
+                    }
                 }
             }
 
@@ -325,10 +330,12 @@ public class HomeActivity extends AppCompatActivity {
                 Log.d("HomeActivity", "Gift removed from favorites: " + giftId);
                 Log.d("HomeActivity", "Current favorite gift IDs: " + favoriteGiftIds);
                 favoriteGiftIds.remove(giftId);
-                int position = getGiftPosition(giftId);
-                if (position != -1) {
-                    giftItems.get(position).setFavorite(false);
-                    giftAdapter.notifyItemChanged(position);
+                for (int i = 0; i < giftItems.size(); i++) {
+                    if (giftItems.get(i).getGiftId().equals(giftId)) {
+                        giftItems.get(i).setFavorite(false);
+                        giftAdapter.notifyItemChanged(i);
+                        break;
+                    }
                 }
             }
 
