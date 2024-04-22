@@ -1,5 +1,6 @@
 package edu.northeastern.echolist;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -29,7 +30,6 @@ import java.util.Map;
  * A simple {@link Fragment} subclass.
  */
 public class AddWishlistItem extends Fragment {
-    private NavigationRouter navigationRouter;
     private DatabaseReference events;
     private DatabaseReference gifts;
     private String userId;
@@ -38,11 +38,17 @@ public class AddWishlistItem extends Fragment {
     private List<String> selectedGifts = new ArrayList<>();
     private Button addGiftButton;
 
-    public AddWishlistItem(NavigationRouter navigationRouter, DatabaseReference events, String userId) {
-        this.navigationRouter = navigationRouter;
-        this.events = events;
-        this.userId = userId;
+    public AddWishlistItem() {
+        events = FirebaseDatabase.getInstance().getReference("events");
         gifts = FirebaseDatabase.getInstance().getReference("gifts");
+    }
+
+    public static AddWishlistItem newInstance(String userId) {
+        AddWishlistItem fragment = new AddWishlistItem();
+        Bundle args = new Bundle();
+        args.putString("userId", userId);
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
@@ -56,6 +62,9 @@ public class AddWishlistItem extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_add_wishlist_item, container, false);
 
+        if (getArguments() != null) {
+            userId = getArguments().getString("userId");
+        }
         // gift selection
         MultiAutoCompleteTextView giftTextView = view.findViewById(R.id.giftSelect);
         giftTextView.setTokenizer(new MultiAutoCompleteTextView.CommaTokenizer());
@@ -141,6 +150,7 @@ public class AddWishlistItem extends Fragment {
                 wishList.child(id).setValue(newItem);
             }
         }
-        navigationRouter.navigate(MyListActivity.class);
+        Intent intent = new Intent(requireContext(), MyListActivity.class);
+        startActivity(intent);
     }
 }

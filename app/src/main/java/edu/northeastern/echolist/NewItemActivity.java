@@ -14,8 +14,9 @@ import com.google.firebase.database.FirebaseDatabase;
 
 public class NewItemActivity extends AppCompatActivity {
 
-    private NavigationRouter navigationRouter;
-    private DatabaseReference events;
+    public NavigationRouter navigationRouter;
+    public DatabaseReference events;
+    public String userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,11 +39,11 @@ public class NewItemActivity extends AppCompatActivity {
 
     private void setupViewPager(ViewPager viewPager) {
         SharedPreferences sharedPreferences = getSharedPreferences("namePref", MODE_PRIVATE);
-        String userId = sharedPreferences.getString("username", "User");
+        userId = sharedPreferences.getString("username", "User");
 
         ViewPagerHelper viewpager = new ViewPagerHelper(getSupportFragmentManager());
-        viewpager.addFragment(new AddEvent(navigationRouter, events, userId), "New Event");
-        viewpager.addFragment(new AddWishlistItem(navigationRouter, events, userId), "New Wishlist Item");
+        viewpager.addFragment(AddEvent.newInstance(userId), "New Event");
+        viewpager.addFragment(AddWishlistItem.newInstance(userId), "New Wishlist Item");
         viewPager.setAdapter(viewpager);
     }
 
