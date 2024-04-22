@@ -24,4 +24,5 @@ public class GiftItem extends Gift {
     public void setFavorite(boolean favorite) {
         isFavorite = favorite;
     }
+
 }

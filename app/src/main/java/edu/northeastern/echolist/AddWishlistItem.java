@@ -43,8 +43,8 @@ public class AddWishlistItem extends Fragment {
         gifts = FirebaseDatabase.getInstance().getReference("gifts");
     }
 
-    public static AddEvent newInstance(String userId) {
-        AddEvent fragment = new AddEvent();
+    public static AddWishlistItem newInstance(String userId) {
+        AddWishlistItem fragment = new AddWishlistItem();
         Bundle args = new Bundle();
         args.putString("userId", userId);
         fragment.setArguments(args);

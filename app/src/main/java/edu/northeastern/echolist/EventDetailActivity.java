@@ -70,7 +70,6 @@ public class EventDetailActivity extends AppCompatActivity {
         eventTitle = findViewById(R.id.eventTitle);
         eventLocation = findViewById(R.id.eventLocation);
         eventDate = findViewById(R.id.eventDate);
-        friendsSpinner = findViewById(R.id.friendsSpinner);
         categorySpinner = findViewById(R.id.categorySpinner);
         visibilitySpinner = findViewById(R.id.visibilitySpinner);
         updateEventButton = findViewById(R.id.updateEventButton);
