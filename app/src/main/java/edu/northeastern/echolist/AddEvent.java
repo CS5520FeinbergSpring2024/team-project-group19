@@ -6,7 +6,6 @@ import static android.content.ContentValues.TAG;
 
 import android.app.DatePickerDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -29,8 +28,6 @@ import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -48,9 +45,8 @@ import java.util.List;
  * create an instance of this fragment.
  */
 public class AddEvent extends Fragment {
-    private final NavigationRouter navigationRouter;
     private final DatabaseReference events;
-    private final String userId;
+    private String userId;
     private TextWatcher textWatcher;
     private EditText eventTitle;
     private EditText eventLocation;
@@ -60,20 +56,21 @@ public class AddEvent extends Fragment {
     private Spinner friendsSpinner;
 
     public AddEvent() {
-        BottomNavigationView bottomNavigationView = getActivity().findViewById(R.id.bottom_navigation);
-        navigationRouter = new NavigationRouter(bottomNavigationView, getActivity());
-        navigationRouter.initNavigation();
-
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("namePref", requireContext().MODE_PRIVATE);
-        userId = sharedPreferences.getString("username", "User");
-
-
         events = FirebaseDatabase.getInstance().getReference("events");
+    }
+
+    public static AddEvent newInstance(String userId) {
+        AddEvent fragment = new AddEvent();
+        Bundle args = new Bundle();
+        args.putString("userId", userId);
+        fragment.setArguments(args);
+        return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRetainInstance(true);
     }
 
     @Override
@@ -81,6 +78,10 @@ public class AddEvent extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_add_event, container, false);
+
+        if (getArguments() != null) {
+            userId = getArguments().getString("userId");
+        }
 
         // watch for text input
         initTextWatcher();
@@ -114,39 +115,6 @@ public class AddEvent extends Fragment {
             }
         });
         eventDate.addTextChangedListener(textWatcher);
-
-        // friends
-        friendsSpinner = view.findViewById(R.id.friendsSpinner);
-        DatabaseReference user = FirebaseDatabase.getInstance().getReference("users");
-        Query userQuery = user.orderByChild("userId").equalTo(userId);
-        userQuery.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                Log.d("TAG", "DataSnapshot: " + snapshot);
-                User user = snapshot.getValue(User.class);
-                if (user == null) {
-                    Log.d("TAG", "User object is null");
-                    return;
-                }
-                List<String> friends = user.getFriends();
-                if (friends == null || friends.isEmpty()) {
-                    Log.d("TAG", "Friends list is null or empty");
-                    return;
-                }
-                ArrayAdapter<String> friendAdapter = new ArrayAdapter<>(
-                        requireContext(),
-                        android.R.layout.simple_spinner_item,
-                        friends
-                );
-                friendAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                friendsSpinner.setAdapter(friendAdapter);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e("TAG", "Error retrieving user data", error.toException());
-            }
-        });
 
         // categories
         categorySpinner = view.findViewById(R.id.categorySpinner);
@@ -210,8 +178,8 @@ public class AddEvent extends Fragment {
 
                 }
             });
-
-            navigationRouter.navigate(HomeActivity.class);
+            Intent intent = new Intent(requireContext(), HomeActivity.class);
+            startActivity(intent);
         });
 
         return view;
@@ -245,7 +213,7 @@ public class AddEvent extends Fragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 // Update the flag based on whether any text is entered
-                navigationRouter.setTextEntered(!TextUtils.isEmpty(s));
+//                navigationRouter.setTextEntered(!TextUtils.isEmpty(s));
             }
 
             @Override
